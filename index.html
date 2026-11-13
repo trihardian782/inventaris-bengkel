@@ -3,1677 +3,704 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Peminjaman Alat Bengkel TI - SMK N 1 Binjai</title>
+    <title>Web Peminjaman Alat Bengkel TI - SMK N 1 Binjai</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Fonts: Inter & JetBrains Mono -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Custom scrollbar & subtle transitions */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        @keyframes pulse-border {
-            0%, 100% { border-color: rgba(239, 68, 68, 0.8); }
-            50% { border-color: rgba(239, 68, 68, 0.2); }
-        }
-        .animate-overdue {
-            animation: pulse-border 2s infinite;
-        }
-        @keyframes scanline {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(110px); }
-            100% { transform: translateY(0); }
-        }
-        .scanner-line {
-            animation: scanline 2.2s ease-in-out infinite;
-        }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Top Identity & Control Header -->
-    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-40 border-b border-brand-700/40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <!-- Brand Identity -->
-                <div class="flex items-center gap-3">
-                    <div class="bg-brand-500/20 border border-brand-400/30 p-2.5 rounded-xl flex-shrink-0">
-                        <i data-lucide="cpu" class="w-7 h-7 text-brand-300"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">
-                                Sistem Peminjaman Alat Bengkel TI
-                            </h1>
-                            <span class="px-2 py-0.5 text-[11px] font-semibold bg-brand-500/30 text-brand-200 border border-brand-400/30 rounded-full">
-                                SMK N 1 BINJAI
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-300 flex items-center gap-1.5 mt-0.5">
-                            <span>Studi Kasus: <strong class="text-white font-medium">Tri Hardian Siregar</strong></span>
-                            <span class="text-slate-500">•</span>
-                            <span class="text-emerald-400 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                                LocalStorage DB Aktif
-                            </span>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Role Switcher & Action Controls -->
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <!-- Role Switcher -->
-                    <div class="flex items-center bg-slate-800/80 border border-slate-700 rounded-xl p-1">
-                        <span class="text-[11px] text-slate-400 px-2 hidden sm:inline">Mode Tampilan:</span>
-                        <select id="roleSwitcher" onchange="changeRole(this.value)" class="bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer">
-                            <option value="PLP">👨‍🔧 Petugas PLP (Admin)</option>
-                            <option value="KEPALA">👔 Kepala Bengkel</option>
-                            <option value="SISWA">🎓 Siswa / Peminjam</option>
-                        </select>
-                    </div>
-
-                    <!-- GitHub Pages Deploy Guide Button -->
-                    <button onclick="openModal('githubModal')" class="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-xl text-xs font-medium transition shadow-sm">
-                        <i data-lucide="github" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Upload GitHub Pages</span>
-                        <span class="sm:hidden">GitHub</span>
-                    </button>
-
-                    <!-- Reset Demo Data -->
-                    <button onclick="openModal('resetModal')" class="flex items-center gap-1.5 px-3 py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 border border-rose-500/40 rounded-xl text-xs font-medium transition">
-                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                        <span>Reset Data</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation Tabs -->
-        <nav class="bg-slate-900/60 border-t border-slate-800 overflow-x-auto">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 sm:gap-2 py-2">
-                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                    <span>Dashboard Pantauan</span>
-                </button>
-                <button onclick="switchTab('borrow')" id="tab-borrow" class="nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">
-                    <i data-lucide="qr-code" class="w-4 h-4"></i>
-                    <span>Pinjam Cepat / Scan QR</span>
-                </button>
-                <button onclick="switchTab('loans')" id="tab-loans" class="nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">
-                    <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-                    <span>Peminjaman & Cicil Balik</span>
-                    <span id="badge-active-loans" class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-500 text-slate-950 font-bold">0</span>
-                </button>
-                <button onclick="switchTab('lab')" id="tab-lab" class="nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">
-                    <i data-lucide="cpu" class="w-4 h-4"></i>
-                    <span>Anti-Error Lab (3 Skenario)</span>
-                    <span class="px-1.5 py-0.5 text-[10px] rounded-full bg-indigo-500 text-white font-bold">DEMO</span>
-                </button>
-                <button onclick="switchTab('database')" id="tab-database" class="nav-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">
-                    <i data-lucide="database" class="w-4 h-4"></i>
-                    <span>4 Laci Database</span>
-                </button>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Role Context Banner -->
-    <div id="roleBanner" class="bg-brand-50 border-b border-brand-200 px-4 py-2 text-xs text-brand-900">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <i data-lucide="info" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
-                <span id="roleBannerText">Anda masuk sebagai <strong>Petugas PLP</strong>: Akses penuh untuk mencatat peminjaman cepat, memproses pengembalian dicicil, dan mengelola inventaris.</span>
-            </div>
-            <div class="text-[11px] font-mono text-brand-700" id="liveClock">Memuat waktu...</div>
-        </div>
-    </div>
-
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- ========================================================= -->
-        <!-- TAB 1: DASHBOARD PANTAUAN (KEPALA BENGKEL & PLP)          -->
-        <!-- ========================================================= -->
-        <section id="view-dashboard" class="space-y-6">
-            <!-- Overdue Alert Banner (Auto-triggers if any loan is overdue) -->
-            <div id="overdueAlertContainer" class="hidden bg-rose-50 border-2 border-rose-500 rounded-2xl p-4 sm:p-5 shadow-md animate-overdue">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex items-start gap-3">
-                        <div class="p-2.5 bg-rose-600 text-white rounded-xl flex-shrink-0 mt-0.5">
-                            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-base font-bold text-rose-900 flex items-center gap-2">
-                                PERINGATAN KETERLAMBATAN PENGEMBALIAN ALAT!
-                                <span id="overdueCountBadge" class="px-2 py-0.5 text-xs bg-rose-600 text-white rounded-full">0 Terlambat</span>
-                            </h2>
-                            <p class="text-xs sm:text-sm text-rose-700 mt-1">
-                                Sistem mendeteksi peminjaman yang melewati batas waktu wajib kembali. Akun peminjam otomatis diblokir sampai alat dikembalikan.
-                            </p>
-                            <div id="overdueListSummary" class="mt-2.5 space-y-1.5"></div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 flex-shrink-0">
-                        <button onclick="sendAllWhatsAppReminders()" class="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i>
-                            <span>Kirim Notif WA Otomatis</span>
-                        </button>
-                        <button onclick="switchTab('loans')" class="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow transition">
-                            <span>Tindak Lanjuti</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Jenis Alat</span>
-                        <div class="p-2 bg-brand-50 text-brand-600 rounded-xl">
-                            <i data-lucide="wrench" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-baseline gap-2">
-                        <span id="stat-total-types" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
-                        <span class="text-xs text-slate-500">kategori aktif</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tersedia di Rak</span>
-                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-baseline gap-2">
-                        <span id="stat-available-units" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
-                        <span class="text-xs text-slate-500">unit siap pakai</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sedang Dipinjam</span>
-                        <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
-                            <i data-lucide="clock" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-baseline gap-2">
-                        <span id="stat-borrowed-units" class="text-2xl sm:text-3xl font-extrabold text-amber-600">0</span>
-                        <span class="text-xs text-slate-500">unit di lapangan</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Telat / Rusak</span>
-                        <div class="p-2 bg-rose-50 text-rose-600 rounded-xl">
-                            <i data-lucide="alert-octagon" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-baseline gap-2">
-                        <span id="stat-overdue-loans" class="text-2xl sm:text-3xl font-extrabold text-rose-600">0</span>
-                        <span class="text-xs text-slate-500">transaksi bermasalah</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Real-time Stock Monitoring & Quick Lab Trigger -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left 2 Columns: Real-time Stock Cards -->
-                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                                <i data-lucide="bar-chart-3" class="w-5 h-5 text-brand-600"></i>
-                                Pantauan Stok Real-Time & Pelacakan Unit Unik
-                            </h3>
-                            <p class="text-xs text-slate-500 mt-0.5">Angka stok diperbarui detik itu juga tanpa perlu menghitung manual ke rak.</p>
-                        </div>
-                        <button onclick="switchTab('borrow')" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1.5 self-start">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Pinjam Alat</span>
-                        </button>
-                    </div>
-                    <div id="dashboardStockGrid" class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Right Column: Anti-Error Lab Quick Card & Recent Activity -->
-                <div class="space-y-6">
-                    <!-- Quick Demo Scenarios Card -->
-                    <div class="bg-gradient-to-br from-slate-900 to-brand-950 text-white rounded-2xl p-5 shadow-md border border-brand-800">
-                        <div class="flex items-center gap-2 text-brand-300 text-xs font-bold uppercase tracking-wider">
-                            <i data-lucide="shield-check" class="w-4 h-4"></i>
-                            <span>Logika Programmer (Anti-Error)</span>
-                        </div>
-                        <h3 class="text-base font-bold mt-1.5">Uji Skenario Masalah Bengkel</h3>
-                        <p class="text-xs text-slate-300 mt-1 leading-relaxed">
-                            Simulasikan masalah nyata di bengkel TI sesuai dokumen analisis kebutuhan:
-                        </p>
-                        <div class="mt-4 space-y-2.5">
-                            <button onclick="switchTab('lab'); runScenario1Demo();" class="w-full text-left p-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition flex items-center justify-between group">
-                                <div>
-                                    <div class="text-xs font-bold text-amber-300">Skenario 1: Rebutan Stok Terakhir</div>
-                                    <div class="text-[11px] text-slate-300">Budi vs Andi klik pinjam di detik sama</div>
-                                </div>
-                                <i data-lucide="play" class="w-4 h-4 text-amber-300 group-hover:translate-x-0.5 transition"></i>
-                            </button>
-
-                            <button onclick="switchTab('loans')" class="w-full text-left p-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition flex items-center justify-between group">
-                                <div>
-                                    <div class="text-xs font-bold text-emerald-300">Skenario 2: Balikin Barang Dicicil</div>
-                                    <div class="text-[11px] text-slate-300">Balikkan Laptop dulu, Tang menyusul</div>
-                                </div>
-                                <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-300 group-hover:translate-x-0.5 transition"></i>
-                            </button>
-
-                            <button onclick="switchTab('borrow'); triggerOverdueBlockerDemo();" class="w-full text-left p-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition flex items-center justify-between group">
-                                <div>
-                                    <div class="text-xs font-bold text-rose-300">Skenario 3: Blokir Rekan Nunggak</div>
-                                    <div class="text-[11px] text-slate-300">Otomatis tolak peminjam bermasalah</div>
-                                </div>
-                                <i data-lucide="lock" class="w-4 h-4 text-rose-300 group-hover:translate-x-0.5 transition"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- WhatsApp Notification Log -->
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                <i data-lucide="bell-ring" class="w-4 h-4 text-emerald-600"></i>
-                                Log Pengingat WA Otomatis
-                            </h4>
-                            <span class="text-[10px] font-mono bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">BOT READY</span>
-                        </div>
-                        <div id="waLogContainer" class="space-y-2 max-h-48 overflow-y-auto text-xs">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- TAB 2: FORM PINJAM CEPAT / SIMULASI SCAN QR               -->
-        <!-- ========================================================= -->
-        <section id="view-borrow" class="hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left: QR Scanner Simulation & Quick Pick -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="scan-line" class="w-5 h-5 text-brand-600"></i>
-                            Simulasi Scan QR Alat / Kartu
-                        </h3>
-                        <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-100 text-brand-700 rounded-full">CEPAT</span>
-                    </div>
-                    <p class="text-xs text-slate-500">
-                        Pengganti buku tulis: arahkan kamera ke stiker QR pada rak alat atau klik tombol simulasi scan di bawah untuk menambahkan alat ke keranjang pinjam.
-                    </p>
-
-                    <!-- Mock Camera Viewfinder -->
-                    <div class="relative bg-slate-900 rounded-2xl h-44 overflow-hidden flex flex-col items-center justify-center border-2 border-slate-800">
-                        <div class="w-32 h-32 border-2 border-brand-400/70 rounded-xl relative flex items-center justify-center">
-                            <i data-lucide="qr-code" class="w-16 h-16 text-brand-400/40"></i>
-                            <div class="scanner-line absolute top-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_#34d399]"></div>
-                        </div>
-                        <span id="qrStatusText" class="text-[11px] font-mono text-emerald-400 mt-2">Kamera Siap Memindai QR...</span>
-                    </div>
-
-                    <!-- Quick QR Scan Buttons -->
-                    <div class="space-y-2">
-                        <div class="text-xs font-semibold text-slate-700">Klik Simulasi Scan QR Alat:</div>
-                        <div class="grid grid-cols-1 gap-2" id="quickQrButtons">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right 2 Columns: Fast Loan Form -->
-                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
-                    <div class="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900">Formulir Peminjaman Alat Bengkel TI</h2>
-                            <p class="text-xs text-slate-500">Mendukung peminjaman beberapa alat sekaligus dalam 1 transaksi.</p>
-                        </div>
-                        <span class="text-xs font-mono bg-slate-100 text-slate-600 px-3 py-1 rounded-lg">TRX-AUTO-ID</span>
-                    </div>
-
-                    <!-- Step 1: Select Borrower -->
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                            1. Pilih Nama Peminjam (Tabel Users)
-                        </label>
-                        <select id="borrowerSelect" onchange="checkBorrowerEligibility()" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
-                            <!-- Populated by JS -->
-                        </select>
-
-                        <!-- Skenario 3: Auto-Blocker Warning Box -->
-                        <div id="borrowerBlockerAlert" class="hidden p-4 bg-rose-50 border-2 border-rose-500 rounded-xl text-rose-900 space-y-1.5">
-                            <div class="flex items-center gap-2 font-bold text-sm text-rose-700">
-                                <i data-lucide="shield-ban" class="w-5 h-5"></i>
-                                <span>AKSES PINJAM DIBLOKIR OTOMATIS (Skenario 3)</span>
-                            </div>
-                            <p id="borrowerBlockerReason" class="text-xs text-rose-800 leading-relaxed"></p>
-                            <div class="pt-1">
-                                <button type="button" onclick="switchTab('loans')" class="text-xs font-bold underline text-rose-700 hover:text-rose-900">
-                                    Lihat pinjaman yang belum dikembalikan &rarr;
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Borrower Info Card when eligible -->
-                        <div id="borrowerInfoCard" class="p-3 bg-brand-50/70 border border-brand-200 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Add Items to Cart -->
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                2. Pilih Alat yang Dipinjam (Multi-Item)
-                            </label>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                            <div class="sm:col-span-5">
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Jenis Alat</label>
-                                <select id="itemSelect" onchange="onItemSelectChange()" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold">
-                                    <!-- Populated by JS -->
-                                </select>
-                            </div>
-
-                            <!-- Dynamic Unit Code Selector (for serialized items like Laptop) or Quantity Input -->
-                            <div id="unitCodeWrapper" class="sm:col-span-4 hidden">
-                                <label class="block text-[11px] font-semibold text-brand-700 mb-1">Kode Unit Unik (Wajib)</label>
-                                <select id="unitCodeSelect" class="w-full p-2.5 bg-brand-50 border border-brand-300 text-brand-900 rounded-lg text-xs font-mono font-bold">
-                                    <!-- Populated by JS -->
-                                </select>
-                            </div>
-
-                            <div id="qtyWrapper" class="sm:col-span-4">
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Jumlah Pinjam</label>
-                                <input type="number" id="itemQtyInput" min="1" value="1" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold">
-                            </div>
-
-                            <div class="sm:col-span-3 flex items-end">
-                                <button type="button" onclick="addItemToCart()" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5">
-                                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                                    <span>Tambah</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Cart List -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-slate-100 px-3.5 py-2 text-[11px] font-bold text-slate-600 uppercase flex justify-between">
-                                <span>Daftar Alat dalam Transaksi Ini</span>
-                                <span id="cartCountLabel">0 Alat Dipilih</span>
-                            </div>
-                            <div id="borrowCartList" class="divide-y divide-slate-100 min-h-[70px] flex flex-col justify-center">
-                                <p class="text-xs text-slate-400 text-center py-4">Belum ada alat dipilih. Silakan tambah alat atau scan QR.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Duration & Submit -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                                3. Batas Waktu Wajib Kembali
-                            </label>
-                            <select id="durationSelect" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold">
-                                <option value="120">2 Jam Praktikum (Normal)</option>
-                                <option value="240">4 Jam Praktikum (1 Sesi Bengkel)</option>
-                                <option value="1440">1 Hari (Besok)</option>
-                                <option value="0.15" class="text-rose-600 font-bold">⚡ Simulasi Telat Cepat (9 Detik)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                                Catatan Keperluan Praktikum
-                            </label>
-                            <input type="text" id="loanNotesInput" placeholder="Contoh: Praktik Crimping Kabel LAN XI TKJ 1" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs">
-                        </div>
-                    </div>
-
-                    <div class="pt-2">
-                        <button id="submitLoanBtn" type="button" onclick="submitLoanTransaction()" class="w-full py-3.5 px-6 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                            <span>Konfirmasi & Simpan Peminjaman ke Database</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- TAB 3: DAFTAR PEMINJAMAN & PENGEMBALIAN DICICIL           -->
-        <!-- ========================================================= -->
-        <section id="view-loans" class="hidden space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="list-checks" class="w-5 h-5 text-brand-600"></i>
-                            Daftar Transaksi & Pengembalian Dicicil (Per Barang)
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-0.5">
-                            Mendukung <strong>Skenario 2</strong>: Setiap alat dalam satu transaksi dapat dikembalikan secara terpisah dengan pencatatan kondisi (Baik / Rusak).
-                        </p>
-                    </div>
-
-                    <!-- Filter Buttons -->
-                    <div class="flex flex-wrap gap-1.5">
-                        <button onclick="setLoanFilter('ALL')" id="filter-ALL" class="loan-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white">Semua</button>
-                        <button onclick="setLoanFilter('ACTIVE')" id="filter-ACTIVE" class="loan-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Sedang Dipinjam / Telat</button>
-                        <button onclick="setLoanFilter('DONE')" id="filter-DONE" class="loan-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Sudah Selesai</button>
-                    </div>
-                </div>
-
-                <!-- Loans List Container -->
-                <div id="loansListContainer" class="mt-5 space-y-4">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- TAB 4: ANTI-ERROR LAB (3 SKENARIO LOGIKA PROGRAMMER)      -->
-        <!-- ========================================================= -->
-        <section id="view-lab" class="hidden space-y-6">
-            <div class="bg-gradient-to-r from-slate-900 to-brand-900 text-white rounded-2xl p-6 shadow-md">
-                <span class="px-2.5 py-1 bg-brand-500/30 border border-brand-400/30 text-brand-200 text-xs font-bold rounded-full">
-                    ARSITEKTUR & LOGIKA PROGRAMMER
-                </span>
-                <h2 class="text-xl sm:text-2xl font-extrabold mt-2">Antisipasi "Masalah Teknis" di Lapangan</h2>
-                <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl">
-                    Sesuai dokumen perencanaan Tri Hardian Siregar, halaman ini mendemonstrasikan bagaimana kode program menangani 3 kejadian tak terduga saat website digunakan di Bengkel TI SMK N 1 Binjai.
+    <!-- =================================================================== -->
+    <!-- 1. HEADER SEDERHANA                                                 -->
+    <!-- =================================================================== -->
+    <header class="bg-slate-900 text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">
+                    Web Peminjaman Alat Bengkel TI - SMK N 1 Binjai
+                </h1>
+                <p class="text-xs text-slate-300 mt-0.5">
+                    Rancangan Sistem oleh <strong class="text-blue-400">Tri Hardian Siregar</strong> • Demo Single-Page (LocalStorage)
                 </p>
             </div>
+            <button onclick="resetDemoData()" class="self-start sm:self-auto px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow transition">
+                🔄 Reset Data Demo
+            </button>
+        </div>
+    </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- SKENARIO 1: RACE CONDITION & DATABASE LOCK -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between space-y-4">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-lg">SKENARIO 1</span>
-                            <i data-lucide="lock" class="w-5 h-5 text-amber-600"></i>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Rebutan Stok Terakhir (Database Lock)</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            <strong>Masalah:</strong> Laptop tinggal 1 unit (<code class="bg-slate-100 px-1 rounded">LAPTOP-03</code>). Di detik yang sama, <strong>Budi</strong> dan <strong>Andi</strong> sama-sama klik tombol "Pinjam" dari HP mereka.
-                        </p>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            <strong>Solusi Koding:</strong> Kunci data sementara (<em>Mutex / Atomic Lock</em>). Siapa yang masuk duluan walau selisih 0,01 detik, dia yang dapat. Yang kedua ditolak otomatis.
-                        </p>
+    <!-- Notifikasi Toast Inline (Pengganti alert) -->
+    <div id="toastBanner" class="hidden max-w-6xl w-full mx-auto px-4 mt-4">
+        <div id="toastContent" class="p-3.5 rounded-xl text-xs font-semibold shadow-sm border flex items-center justify-between"></div>
+    </div>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
+
+        <!-- =================================================================== -->
+        <!-- 2. BAGIAN ATAS: PANTAUAN STOK ALAT REAL-TIME (DASHBOARD)            -->
+        <!-- =================================================================== -->
+        <section>
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-700">
+                    1. Pantauan Stok Alat Real-Time (Kepala Bengkel & PLP)
+                </h2>
+                <span id="liveClock" class="text-xs font-mono text-slate-500"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="stockCardsContainer">
+                <!-- Kartu stok 3 alat utama dirender oleh JavaScript -->
+            </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- 3. BAGIAN TENGAH: FORM PINJAM (KIRI) & TRANSAKSI AKTIF (KANAN)      -->
+        <!-- =================================================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- KOLOM KIRI: FORM PINJAM CEPAT + SKENARIO 1 & 3 -->
+            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h2 class="text-base font-bold text-slate-900">2. Form Pinjam Cepat</h2>
+                    <p class="text-xs text-slate-500">Pilih peminjam dan alat. Mendukung pinjam lebih dari 1 alat sekaligus.</p>
+                </div>
+
+                <!-- Pilih Peminjam (Users) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Peminjam (Siswa / Guru)</label>
+                    <select id="userSelect" onchange="validateBorrower()" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-600"></select>
+                </div>
+
+                <!-- Peringatan Skenario 3: Blokir Otomatis Rekan Nunggak -->
+                <div id="blockerAlert" class="hidden p-3.5 bg-rose-50 border-2 border-rose-500 rounded-xl text-xs text-rose-900 space-y-1">
+                    <div class="font-extrabold text-rose-700">⛔ AKUN DIBLOKIR OTOMATIS (Skenario 3)</div>
+                    <p id="blockerMessage" class="leading-relaxed"></p>
+                </div>
+
+                <!-- Form Tambah Alat ke Keranjang -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Alat Bengkel</label>
+                        <select id="itemSelect" onchange="handleItemChange()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold"></select>
                     </div>
 
-                    <div class="space-y-3 pt-2">
-                        <button onclick="runScenario1Demo()" class="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
-                            <i data-lucide="zap" class="w-4 h-4"></i>
-                            <span>Simulasikan Budi vs Andi (0.01 Detik)</span>
-                        </button>
+                    <!-- Pilihan Kode Unit Unik (Khusus Laptop) -->
+                    <div id="unitSelectWrapper" class="hidden">
+                        <label class="block text-xs font-bold text-blue-700 mb-1">Pilih Kode Unit Laptop</label>
+                        <select id="unitSelect" class="w-full p-2.5 bg-blue-50 border border-blue-300 text-blue-900 rounded-xl text-xs font-mono font-bold"></select>
+                    </div>
 
-                        <!-- Terminal Output for Race Condition -->
-                        <div id="raceConditionLog" class="bg-slate-950 text-emerald-400 font-mono text-[11px] p-3.5 rounded-xl min-h-[150px] max-h-56 overflow-y-auto space-y-1 border border-slate-800">
-                            <div class="text-slate-500">// Klik tombol di atas untuk menguji Database Lock...</div>
-                        </div>
+                    <!-- Input Jumlah (Untuk Multimeter & Tang Crimping) -->
+                    <div id="qtyInputWrapper">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Jumlah Pinjam</label>
+                        <input type="number" id="qtyInput" min="1" value="1" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold">
+                    </div>
+
+                    <button type="button" onclick="addToCart()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition">
+                        + Tambah ke Daftar Pinjam
+                    </button>
+                </div>
+
+                <!-- Daftar Keranjang Alat yang Akan Dipinjam -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <div class="bg-slate-100 px-3 py-1.5 text-[11px] font-bold text-slate-600 flex justify-between">
+                        <span>Alat yang Dipilih:</span>
+                        <span id="cartCount">0 Item</span>
+                    </div>
+                    <div id="cartList" class="divide-y divide-slate-100 text-xs p-2 text-slate-500">
+                        Belum ada alat ditambahkan.
                     </div>
                 </div>
 
-                <!-- SKENARIO 2: PENGEMBALIAN DICICIL -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between space-y-4">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg">SKENARIO 2</span>
-                            <i data-lucide="split" class="w-5 h-5 text-emerald-600"></i>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Balikin Barang Dicicil (Loan Details)</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            <strong>Masalah:</strong> Siswa meminjam 1 Laptop dan 2 Tang Crimping. Besoknya dia baru mengembalikan Laptopnya saja, tangnya masih dipakai.
-                        </p>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            <strong>Solusi Koding:</strong> Memisahkan tabel <code class="bg-slate-100 px-1 rounded">loans</code> (header transaksi) dan <code class="bg-slate-100 px-1 rounded">loan_details</code> (rincian per item), sehingga pengembalian dicatat per barang beserta kondisinya (Baik/Rusak).
-                        </p>
-                    </div>
-
-                    <div class="space-y-3 pt-2">
-                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900">
-                            <strong>Data Demo Siap Uji:</strong><br>
-                            Transaksi milik <strong>Siti Aminah (XII TKJ 1)</strong> memiliki 1 unit <code>LAPTOP-01</code> dan <code>2 Tang Crimping</code> yang siap dicicil pengembaliannya.
-                        </div>
-                        <button onclick="switchTab('loans')" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
-                            <span>Buka Halaman Cicil Pengembalian</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
-                    </div>
+                <!-- Pilih Durasi Peminjaman -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Batas Waktu Pengembalian</label>
+                    <select id="durationSelect" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold">
+                        <option value="120">2 Jam Praktikum (Normal)</option>
+                        <option value="1440">1 Hari (Besok)</option>
+                        <option value="0.0833">⚡ Simulasi Telat 5 Detik (Uji Notif Merah & WA)</option>
+                    </select>
                 </div>
 
-                <!-- SKENARIO 3: BLOKIR OTOMATIS REKAN NUNGGAK -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between space-y-4">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2.5 py-1 bg-rose-100 text-rose-800 text-xs font-bold rounded-lg">SKENARIO 3</span>
-                            <i data-lucide="user-x" class="w-5 h-5 text-rose-600"></i>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Blokir Otomatis Rekan Nunggak</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            <strong>Masalah:</strong> Siswa masih memiliki tanggungan alat yang belum dikembalikan (apalagi sudah telat), tapi mencoba meminjam alat lain.
-                        </p>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            <strong>Solusi Koding:</strong> Validasi otomatis pada <code class="bg-slate-100 px-1 rounded">checkBorrowerEligibility()</code>. Selama masih ada item berstatus dipinjam/telat, tombol pinjam dikunci.
-                        </p>
-                    </div>
+                <!-- Tombol Submit Pinjam -->
+                <button id="borrowSubmitBtn" type="button" onclick="submitBorrow()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-extrabold rounded-xl shadow transition">
+                    ✅ Pinjam Alat Sekarang
+                </button>
 
-                    <div class="space-y-3 pt-2">
-                        <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-900">
-                            <strong>Data Demo Siap Uji:</strong><br>
-                            Akun <strong>Rizky Pratama (XI TKJ 2)</strong> memiliki pinjaman <code>Multimeter Digital</code> yang berstatus <strong>TELAT</strong>.
-                        </div>
-                        <button onclick="switchTab('borrow'); triggerOverdueBlockerDemo();" class="w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
-                            <span>Uji Blokir Akun Rizky di Form Pinjam</span>
-                            <i data-lucide="shield-alert" class="w-4 h-4"></i>
-                        </button>
+                <!-- Tombol Simulasi Skenario 1: Rebutan Stok Terakhir -->
+                <div class="pt-3 border-t border-slate-100">
+                    <button type="button" onclick="simulateRaceCondition()" class="w-full py-2.5 px-3 bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-bold rounded-xl transition">
+                        ⚡ Simulasi Rebutan Stok (Skenario 1: Budi vs Andi)
+                    </button>
+                    <div id="raceResultBox" class="hidden mt-2.5 p-3 bg-slate-900 text-slate-100 rounded-xl text-[11px] font-mono space-y-1"></div>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN: DAFTAR PEMINJAMAN AKTIF & PENGEMBALIAN DICICIL (SKENARIO 2) -->
+            <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+                <div class="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900">3. Peminjaman Aktif & Pengembalian Dicicil</h2>
+                        <p class="text-xs text-slate-500">Mendukung <strong>Skenario 2</strong>: Kembalikan barang satu per satu & cek status telat otomatis.</p>
                     </div>
+                    <span id="activeLoanCountBadge" class="self-start px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">
+                        0 Aktif
+                    </span>
+                </div>
+
+                <!-- Preview Pesan WhatsApp Otomatis (Muncul saat tombol Kirim Notif WA diklik) -->
+                <div id="waPreviewBox" class="hidden p-3.5 bg-emerald-50 border border-emerald-400 rounded-xl text-xs space-y-1.5">
+                    <div class="flex items-center justify-between font-bold text-emerald-800">
+                        <span>📲 Preview Pesan WhatsApp Otomatis Terkirim:</span>
+                        <button onclick="document.getElementById('waPreviewBox').classList.add('hidden')" class="text-emerald-700 hover:underline">Tutup</button>
+                    </div>
+                    <p id="waPreviewText" class="bg-white p-2.5 rounded-lg border border-emerald-200 text-slate-700 font-mono text-[11px]"></p>
+                </div>
+
+                <!-- Daftar Kartu Peminjaman -->
+                <div id="activeLoansContainer" class="space-y-3.5">
+                    <!-- Dirender oleh JavaScript -->
                 </div>
             </div>
         </section>
 
-        <!-- ========================================================= -->
-        <!-- TAB 5: DATA MASTER (4 LACI DATABASE INTERAKTIF)           -->
-        <!-- ========================================================= -->
-        <section id="view-database" class="hidden space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="database" class="w-5 h-5 text-brand-600"></i>
-                            Arsitektur "Isi Otak" Website: 4 Laci Database
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-0.5">
-                            Transparansi penuh 4 tabel relasional (<code class="text-brand-600">users</code>, <code class="text-brand-600">items</code>, <code class="text-brand-600">loans</code>, <code class="text-brand-600">loan_details</code>) yang tersimpan aman di LocalStorage.
-                        </p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="openModal('addUserModal')" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5">
-                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-                            <span>+ User Baru</span>
-                        </button>
-                        <button onclick="openModal('addItemModal')" class="px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5">
-                            <i data-lucide="package-plus" class="w-3.5 h-3.5"></i>
-                            <span>+ Alat Baru</span>
-                        </button>
-                    </div>
+        <!-- =================================================================== -->
+        <!-- 4. BAGIAN BAWAH: INTIP ISI 4 LACI DATABASE (TAB SEDERHANA)          -->
+        <!-- =================================================================== -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900">4. Intip Isi 4 Laci Database (Live LocalStorage)</h2>
+                    <p class="text-xs text-slate-500">Struktur tabel relasional sesuai rancangan analisis kebutuhan sistem.</p>
                 </div>
-
-                <!-- 4 Database Drawers Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-5">
-                    <!-- Laci 1: users -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
-                            <span class="text-xs font-bold font-mono">1. Tabel: users (Data Pengguna)</span>
-                            <span id="count-users" class="text-[11px] bg-slate-700 px-2 py-0.5 rounded-full">0 rows</span>
-                        </div>
-                        <div class="overflow-x-auto max-h-64">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-2.5">Nama & Kelas</th>
-                                        <th class="p-2.5">NIS/NIP</th>
-                                        <th class="p-2.5">No. WA</th>
-                                        <th class="p-2.5">Peran</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-users" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Laci 2: items -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
-                            <span class="text-xs font-bold font-mono">2. Tabel: items (Inventaris & Kode Unit)</span>
-                            <span id="count-items" class="text-[11px] bg-slate-700 px-2 py-0.5 rounded-full">0 rows</span>
-                        </div>
-                        <div class="overflow-x-auto max-h-64">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-2.5">Nama Alat</th>
-                                        <th class="p-2.5">Total</th>
-                                        <th class="p-2.5">Di Rak</th>
-                                        <th class="p-2.5">Rusak</th>
-                                        <th class="p-2.5">Kode Unik</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-items" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Laci 3: loans -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
-                            <span class="text-xs font-bold font-mono">3. Tabel: loans (Header Peminjaman)</span>
-                            <span id="count-loans" class="text-[11px] bg-slate-700 px-2 py-0.5 rounded-full">0 rows</span>
-                        </div>
-                        <div class="overflow-x-auto max-h-64">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-2.5">ID</th>
-                                        <th class="p-2.5">Peminjam</th>
-                                        <th class="p-2.5">Batas Balik</th>
-                                        <th class="p-2.5">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-loans" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Laci 4: loan_details -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
-                            <span class="text-xs font-bold font-mono">4. Tabel: loan_details (Rincian Per Barang)</span>
-                            <span id="count-loan-details" class="text-[11px] bg-slate-700 px-2 py-0.5 rounded-full">0 rows</span>
-                        </div>
-                        <div class="overflow-x-auto max-h-64">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-2.5">ID Pinjam</th>
-                                        <th class="p-2.5">Alat / Unit</th>
-                                        <th class="p-2.5">Qty</th>
-                                        <th class="p-2.5">Status & Kondisi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-loan-details" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                <!-- Tab 4 Laci Database -->
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="switchDbTab('users')" id="dbtab-users" class="db-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white">1. users</button>
+                    <button onclick="switchDbTab('items')" id="dbtab-items" class="db-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">2. items</button>
+                    <button onclick="switchDbTab('loans')" id="dbtab-loans" class="db-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">3. status peminjaman</button>
+                    <button onclick="switchDbTab('loan_details')" id="dbtab-loan_details" class="db-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">4. peminjaman_details</button>
                 </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse" id="dbTableOutput">
+                    <!-- Isi tabel dirender otomatis sesuai tab laci yang aktif -->
+                </table>
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-            <div>
-                &copy; 2026 <strong>Bengkel Teknik Informatika - SMK Negeri 1 Binjai</strong>. Rancangan Sistem oleh <strong>Tri Hardian Siregar</strong>.
-            </div>
-            <div class="flex items-center gap-3">
-                <span>Single-File Static Web App</span>
-                <span>•</span>
-                <button onclick="openModal('githubModal')" class="text-brand-600 hover:underline font-semibold">Panduan Deploy GitHub Pages</button>
-            </div>
-        </div>
-    </footer>
-
-    <!-- ========================================================= -->
-    <!-- MODALS & TOAST NOTIFICATION                               -->
-    <!-- ========================================================= -->
-
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
-
-    <!-- Modal 1: GitHub Pages Upload Guide -->
-    <div id="githubModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="github" class="w-5 h-5 text-slate-800"></i>
-                    Cara Upload ke GitHub & Aktifkan GitHub Pages
-                </h3>
-                <button onclick="closeModal('githubModal')" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Aplikasi ini dirancang <strong>100% Static Single-File</strong> sehingga tidak membutuhkan server PHP/MySQL untuk dijalankan secara online.</p>
-                <ol class="list-decimal pl-5 space-y-2 text-slate-700">
-                    <li>Simpan kode aplikasi ini dengan nama file <code class="bg-slate-100 px-1.5 py-0.5 rounded font-bold text-brand-700">index.html</code>.</li>
-                    <li>Buka <a href="https://github.com" target="_blank" class="text-brand-600 underline font-semibold">GitHub.com</a> dan klik <strong>New Repository</strong> (misal beri nama: <code class="bg-slate-100 px-1 rounded">peminjaman-bengkel-ti</code>).</li>
-                    <li>Klik <strong>uploading an existing file</strong>, lalu seret file <code class="bg-slate-100 px-1 rounded">index.html</code> dan klik <strong>Commit changes</strong>.</li>
-                    <li>Masuk ke tab <strong>Settings &rarr; Pages</strong> pada repositori tersebut.</li>
-                    <li>Pada bagian <em>Branch</em>, pilih <code class="bg-slate-100 px-1 rounded">main</code> dan folder <code class="bg-slate-100 px-1 rounded">/ (root)</code>, lalu klik <strong>Save</strong>.</li>
-                    <li>Tunggu ±1 menit, link website live Anda akan muncul dan siap dipresentasikan!</li>
-                </ol>
-            </div>
-            <div class="pt-2 flex justify-end">
-                <button onclick="closeModal('githubModal')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl">Mengerti</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 2: Reset Demo Confirmation -->
-    <div id="resetModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex items-center gap-3 text-rose-600">
-                <div class="p-2.5 bg-rose-100 rounded-xl">
-                    <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
-                </div>
-                <h3 class="text-base font-bold text-slate-900">Reset Semua Data Demo?</h3>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed">
-                Tindakan ini akan mengembalikan isi LocalStorage ke data awal studi kasus (termasuk data contoh Budi, Andi, Siti untuk Skenario 2, dan Rizky yang telat untuk Skenario 3).
-            </p>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeModal('resetModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">Batal</button>
-                <button onclick="resetDemoData()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl">Ya, Reset Sekarang</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 3: Add New User -->
-    <div id="addUserModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-900">Tambah Pengguna Baru (Tabel Users)</h3>
-                <button onclick="closeModal('addUserModal')" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Nama Lengkap & Kelas</label>
-                    <input type="text" id="newUserName" placeholder="Contoh: Ahmad Fauzi (XI TKJ 1)" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">NIS / NIP</label>
-                    <input type="text" id="newUserIdNum" placeholder="Contoh: 20261045" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Nomor WhatsApp</label>
-                    <input type="text" id="newUserWa" placeholder="Contoh: 081265432199" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Peran</label>
-                    <select id="newUserRole" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                        <option value="Siswa">Siswa</option>
-                        <option value="Petugas PLP">Petugas PLP</option>
-                        <option value="Kepala Bengkel">Kepala Bengkel</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeModal('addUserModal')" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Batal</button>
-                <button onclick="saveNewUser()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl">Simpan User</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 4: Add New Item -->
-    <div id="addItemModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-900">Tambah Alat Baru (Tabel Items)</h3>
-                <button onclick="closeModal('addItemModal')" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Nama Alat Bengkel</label>
-                    <input type="text" id="newItemName" placeholder="Contoh: MikroTik RouterBoard RB941" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">Jumlah Unit Dimiliki</label>
-                    <input type="number" id="newItemTotal" min="1" max="50" value="3" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div class="flex items-center gap-2 bg-brand-50 p-3 rounded-xl border border-brand-200">
-                    <input type="checkbox" id="newItemSerialized" class="rounded text-brand-600">
-                    <label for="newItemSerialized" class="text-brand-900 font-medium">
-                        Barang Mahal / Beri Kode Unik Per Unit (misal: MIKROTIK-01, 02...)
-                    </label>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeModal('addItemModal')" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Batal</button>
-                <button onclick="saveNewItem()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl">Simpan Alat</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================================= -->
-    <!-- JAVASCRIPT APPLICATION LOGIC (SELF-CONTAINED DATABASE)    -->
-    <!-- ========================================================= -->
+    <!-- =================================================================== -->
+    <!-- JAVASCRIPT MURNI (LOGIKA DATABASE, VALIDASI & SIMULASI)             -->
+    <!-- =================================================================== -->
     <script>
-        const STORAGE_KEY = 'smkn1binjai_bengkel_ti_db_v1';
+        const DB_KEY = 'smkn1_binjai_bengkel_ti_simple_v1';
+        let activeDbTab = 'users';
+        let cart = [];
+        let isDbLocked = false; // Kunci database sementara (Mutex Lock untuk Skenario 1)
 
-        // Default Seed Data tailored to Tri Hardian Siregar's Case Study
-        function getInitialSeedData() {
+        // Data Awal Studi Kasus
+        function getDefaultData() {
             const now = Date.now();
-            const oneHour = 3600 * 1000;
-
             return {
-                currentRole: 'PLP',
                 users: [
-                    { id: 'USR-01', name: 'Tri Hardian Siregar, S.Kom', idNumber: 'NIP-1992041201', wa: '081260001111', role: 'Petugas PLP' },
-                    { id: 'USR-02', name: 'Drs. Hendra Wijaya, M.Pd', idNumber: 'NIP-1978081502', wa: '081260002222', role: 'Kepala Bengkel' },
-                    { id: 'USR-03', name: 'Budi Santoso (XI TKJ 1)', idNumber: '2026001', wa: '085270010001', role: 'Siswa' },
-                    { id: 'USR-04', name: 'Andi Pratama (XI TKJ 1)', idNumber: '2026002', wa: '085270010002', role: 'Siswa' },
-                    { id: 'USR-05', name: 'Siti Aminah (XII TKJ 1)', idNumber: '2025014', wa: '085270010005', role: 'Siswa' },
-                    { id: 'USR-06', name: 'Rizky Ramadhan (XI TKJ 2)', idNumber: '2026019', wa: '085270010006', role: 'Siswa' }
+                    { id: 'U1', name: 'Budi Santoso (XI TKJ 1)', nis: '202601', wa: '081260010001', role: 'Siswa' },
+                    { id: 'U2', name: 'Andi Pratama (XI TKJ 1)', nis: '202602', wa: '081260010002', role: 'Siswa' },
+                    { id: 'U3', name: 'Siti Aminah (XII TKJ 1)', nis: '202503', wa: '081260010003', role: 'Siswa' },
+                    { id: 'U4', name: 'Rizky Ramadhan (XI TKJ 2)', nis: '202604', wa: '081260010004', role: 'Siswa' },
+                    { id: 'U5', name: 'Tri Hardian Siregar, S.Kom', nis: 'NIP-01', wa: '081260019999', role: 'Petugas PLP' }
                 ],
                 items: [
                     {
-                        id: 'ITM-01',
-                        name: 'Laptop Praktikum Asus ROG/VivoBook',
-                        totalStock: 3,
-                        availableStock: 1, // LAPTOP-03 is the ONLY 1 left! Ready for Scenario 1 Race Condition
-                        damagedStock: 0,
+                        id: 'I1',
+                        name: 'Laptop Praktikum',
+                        total: 3,
+                        available: 1, // Tinggal LAPTOP-03 yang tersedia (siap untuk Skenario 1)
+                        damaged: 0,
                         isSerialized: true,
                         units: [
-                            { code: 'LAPTOP-01', status: 'BORROWED', holder: 'Siti Aminah (XII TKJ 1)' },
-                            { code: 'LAPTOP-02', status: 'BORROWED', holder: 'Cadangan Lab Jaringan' },
-                            { code: 'LAPTOP-03', status: 'AVAILABLE', holder: null }
+                            { code: 'LAPTOP-01', status: 'Dipinjam', holder: 'Siti Aminah (XII TKJ 1)' },
+                            { code: 'LAPTOP-02', status: 'Dipinjam', holder: 'Lab Jaringan' },
+                            { code: 'LAPTOP-03', status: 'Tersedia', holder: null }
                         ]
                     },
                     {
-                        id: 'ITM-02',
-                        name: 'Tang Crimping RJ45 Pro',
-                        totalStock: 10,
-                        availableStock: 8,
-                        damagedStock: 0,
+                        id: 'I2',
+                        name: 'Multimeter',
+                        total: 5,
+                        available: 4, // 1 sedang dipinjam Rizky (Telat)
+                        damaged: 0,
                         isSerialized: false,
                         units: []
                     },
                     {
-                        id: 'ITM-03',
-                        name: 'Multimeter Digital Sanwa',
-                        totalStock: 6,
-                        availableStock: 5,
-                        damagedStock: 0,
-                        isSerialized: false,
-                        units: []
-                    },
-                    {
-                        id: 'ITM-04',
-                        name: 'LAN Cable Tester',
-                        totalStock: 8,
-                        availableStock: 8,
-                        damagedStock: 0,
+                        id: 'I3',
+                        name: 'Tang Crimping',
+                        total: 8,
+                        available: 6, // 2 sedang dipinjam Siti Aminah
+                        damaged: 0,
                         isSerialized: false,
                         units: []
                     }
                 ],
                 loans: [
-                    // Scenario 2 Demo Loan: Multi-item loan ready for partial return (cicil balik)
+                    // Contoh Skenario 2: Siti pinjam 1 Laptop + 2 Tang Crimping (bisa dibalikin dicicil)
                     {
-                        id: 'TRX-1001',
-                        userId: 'USR-05',
-                        borrowTime: now - (2 * oneHour),
-                        dueTime: now + (3 * oneHour),
-                        notes: 'Konfigurasi Mikrotik & Crimping Kabel UTP',
-                        status: 'ACTIVE'
+                        id: 'TRX-01',
+                        userId: 'U3',
+                        borrowTime: now - 3600000,
+                        dueTime: now + 7200000,
+                        status: 'Dipinjam'
                     },
-                    // Scenario 3 Demo Loan: Overdue loan that auto-blocks Rizky
+                    // Contoh Skenario 3: Rizky telat mengembalikan Multimeter (akun otomatis terblokir)
                     {
-                        id: 'TRX-1002',
-                        userId: 'USR-06',
-                        borrowTime: now - (26 * oneHour),
-                        dueTime: now - (2 * oneHour), // Overdue by 2 hours!
-                        notes: 'Pengukuran tegangan power supply PC',
-                        status: 'OVERDUE'
+                        id: 'TRX-02',
+                        userId: 'U4',
+                        borrowTime: now - 86400000,
+                        dueTime: now - 3600000,
+                        status: 'Telat'
                     }
                 ],
                 loan_details: [
-                    // Details for TRX-1001 (Siti Aminah: 1 Laptop + 2 Tang Crimping)
-                    {
-                        id: 'DTL-01',
-                        loanId: 'TRX-1001',
-                        itemId: 'ITM-01',
-                        unitCode: 'LAPTOP-01',
-                        qty: 1,
-                        returnedQty: 0,
-                        condition: 'GOOD',
-                        status: 'BORROWED'
-                    },
-                    {
-                        id: 'DTL-02',
-                        loanId: 'TRX-1001',
-                        itemId: 'ITM-02',
-                        unitCode: null,
-                        qty: 2,
-                        returnedQty: 0,
-                        condition: 'GOOD',
-                        status: 'BORROWED'
-                    },
-                    // Details for TRX-1002 (Rizky Ramadhan: 1 Multimeter - Overdue)
-                    {
-                        id: 'DTL-03',
-                        loanId: 'TRX-1002',
-                        itemId: 'ITM-03',
-                        unitCode: null,
-                        qty: 1,
-                        returnedQty: 0,
-                        condition: 'GOOD',
-                        status: 'BORROWED'
-                    }
-                ],
-                waLogs: [
-                    {
-                        time: new Date(now - 1800000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-                        to: 'Rizky Ramadhan (085270010006)',
-                        msg: '[AUTO-REMINDER] Halo Rizky, peminjaman Multimeter Digital (TRX-1002) telah melewati batas waktu. Mohon segera dikembalikan ke Bengkel TI SMK N 1 Binjai.'
-                    }
+                    { id: 'D1', loanId: 'TRX-01', itemId: 'I1', unitCode: 'LAPTOP-01', qty: 1, status: 'Dipinjam', condition: '-' },
+                    { id: 'D2', loanId: 'TRX-01', itemId: 'I3', unitCode: null, qty: 2, status: 'Dipinjam', condition: '-' },
+                    { id: 'D3', loanId: 'TRX-02', itemId: 'I2', unitCode: null, qty: 1, status: 'Dipinjam', condition: '-' }
                 ]
             };
         }
 
-        // Global State
-        let db = loadDatabase();
-        let activeTab = 'dashboard';
-        let loanFilter = 'ALL';
-        let borrowCart = [];
-        let dbMutexLock = false; // Mutex lock for Scenario 1 Race Condition
-
-        function loadDatabase() {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) {
-                const seed = getInitialSeedData();
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-                return seed;
-            }
-            try {
-                return JSON.parse(raw);
-            } catch (e) {
-                const seed = getInitialSeedData();
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-                return seed;
-            }
-        }
-
-        function saveDatabase() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        // Load & Save LocalStorage
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || getDefaultData();
+        function saveDb() {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
         }
 
         function resetDemoData() {
-            db = getInitialSeedData();
-            borrowCart = [];
-            saveDatabase();
-            closeModal('resetModal');
-            showToast('Data demo berhasil di-reset ke kondisi awal studi kasus!', 'success');
-            refreshAllUI();
+            db = getDefaultData();
+            cart = [];
+            saveDb();
+            document.getElementById('raceResultBox').classList.add('hidden');
+            document.getElementById('waPreviewBox').classList.add('hidden');
+            showToast('Data demo berhasil dikembalikan ke pengaturan awal!', 'info');
+            renderAll();
         }
 
-        // =========================================================
-        // REAL-TIME OVERDUE CHECKER (RUNS EVERY SECOND)
-        // =========================================================
-        function checkOverdueLoans() {
+        // ===================================================================
+        // FUNGSI NOTIFIKASI TOAST (PENGGANTI ALERT)
+        // ===================================================================
+        function showToast(msg, type = 'success') {
+            const banner = document.getElementById('toastBanner');
+            const content = document.getElementById('toastContent');
+            banner.classList.remove('hidden');
+
+            const styles = {
+                success: 'bg-emerald-50 border-emerald-400 text-emerald-900',
+                error: 'bg-rose-50 border-rose-400 text-rose-900',
+                info: 'bg-blue-50 border-blue-400 text-blue-900'
+            };
+            content.className = `p-3.5 rounded-xl text-xs font-semibold shadow-sm border flex items-center justify-between ${styles[type] || styles.info}`;
+            content.innerHTML = `<span>${msg}</span><button onclick="document.getElementById('toastBanner').classList.add('hidden')" class="ml-3 font-bold underline">Tutup</button>`;
+        }
+
+        // ===================================================================
+        // PENGECEKAN KETERLAMBATAN REAL-TIME (TIAP DETIK)
+        // ===================================================================
+        function checkOverdueRealtime() {
             const now = Date.now();
-            let stateChanged = false;
+            let changed = false;
 
             db.loans.forEach(loan => {
-                if (loan.status !== 'DONE') {
-                    // Check if all details are returned
-                    const details = db.loan_details.filter(d => d.loanId === loan.id);
-                    const allReturned = details.every(d => d.status === 'RETURNED');
-                    if (allReturned) {
-                        loan.status = 'DONE';
-                        stateChanged = true;
-                    } else if (now > loan.dueTime && loan.status !== 'OVERDUE') {
-                        loan.status = 'OVERDUE';
-                        stateChanged = true;
-                        const user = db.users.find(u => u.id === loan.userId);
-                        if (user) {
-                            addWaLog(user, `Peringatan Otomatis: Transaksi ${loan.id} melewati batas waktu kembali!`);
-                            showToast(`ALERT TELAT: Peminjaman milik ${user.name} melewati batas waktu!`, 'error');
-                        }
-                    }
-                }
-            });
-
-            if (stateChanged) {
-                saveDatabase();
-                refreshAllUI();
-            }
-        }
-
-        function addWaLog(user, message) {
-            const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            db.waLogs.unshift({
-                time: timeStr,
-                to: `${user.name} (${user.wa})`,
-                msg: message
-            });
-            if (db.waLogs.length > 15) db.waLogs.pop();
-            saveDatabase();
-        }
-
-        // =========================================================
-        // NAVIGATION & ROLE SWITCHING
-        // =========================================================
-        function switchTab(tabName) {
-            activeTab = tabName;
-            const views = ['dashboard', 'borrow', 'loans', 'lab', 'database'];
-            views.forEach(v => {
-                const el = document.getElementById(`view-${v}`);
-                const btn = document.getElementById(`tab-${v}`);
-                if (v === tabName) {
-                    el.classList.remove('hidden');
-                    btn.classList.add('bg-brand-600', 'text-white', 'shadow');
-                    btn.classList.remove('text-slate-300', 'hover:bg-slate-800');
-                } else {
-                    el.classList.add('hidden');
-                    btn.classList.remove('bg-brand-600', 'text-white', 'shadow');
-                    btn.classList.add('text-slate-300', 'hover:bg-slate-800');
-                }
-            });
-            refreshAllUI();
-        }
-
-        function changeRole(role) {
-            db.currentRole = role;
-            saveDatabase();
-            const bannerText = document.getElementById('roleBannerText');
-            if (role === 'PLP') {
-                bannerText.innerHTML = 'Anda masuk sebagai <strong>Petugas PLP (Admin Bengkel)</strong>: Akses penuh untuk mencatat peminjaman cepat, memproses pengembalian dicicil, dan mengelola 4 laci database.';
-            } else if (role === 'KEPALA') {
-                bannerText.innerHTML = 'Anda masuk sebagai <strong>Kepala Bengkel TI</strong>: Mode pantauan eksekutif real-time untuk mengecek ketersediaan stok di rak, kondisi alat rusak, dan keterlambatan.';
-                if (activeTab === 'borrow') switchTab('dashboard');
-            } else {
-                bannerText.innerHTML = 'Anda masuk sebagai <strong>Siswa / Peminjam</strong>: Dapat memindai QR alat dan mengajukan peminjaman cepat (dengan pengecekan blokir otomatis).';
-                if (activeTab === 'database') switchTab('borrow');
-            }
-            refreshAllUI();
-        }
-
-        // =========================================================
-        // UI RENDERING FUNCTIONS
-        // =========================================================
-        function refreshAllUI() {
-            renderDashboard();
-            renderBorrowForm();
-            renderLoansList();
-            renderDatabaseTables();
-            updateActiveLoansBadge();
-            lucide.createIcons();
-        }
-
-        function updateActiveLoansBadge() {
-            const activeCount = db.loans.filter(l => l.status !== 'DONE').length;
-            document.getElementById('badge-active-loans').textContent = activeCount;
-        }
-
-        // 1. RENDER DASHBOARD
-        function renderDashboard() {
-            const totalTypes = db.items.length;
-            let availableUnits = 0;
-            let borrowedUnits = 0;
-
-            db.items.forEach(item => {
-                availableUnits += item.availableStock;
-                const activeBorrowed = item.totalStock - item.availableStock - item.damagedStock;
-                borrowedUnits += Math.max(0, activeBorrowed);
-            });
-
-            const overdueLoans = db.loans.filter(l => l.status === 'OVERDUE');
-            const totalDamaged = db.items.reduce((acc, it) => acc + it.damagedStock, 0);
-
-            document.getElementById('stat-total-types').textContent = totalTypes;
-            document.getElementById('stat-available-units').textContent = availableUnits;
-            document.getElementById('stat-borrowed-units').textContent = borrowedUnits;
-            document.getElementById('stat-overdue-loans').textContent = overdueLoans.length + (totalDamaged > 0 ? ` (+${totalDamaged} Rsk)` : '');
-
-            // Overdue Alert Box
-            const alertContainer = document.getElementById('overdueAlertContainer');
-            if (overdueLoans.length > 0) {
-                alertContainer.classList.remove('hidden');
-                document.getElementById('overdueCountBadge').textContent = `${overdueLoans.length} Transaksi Telat`;
-                const summaryDiv = document.getElementById('overdueListSummary');
-                summaryDiv.innerHTML = overdueLoans.map(loan => {
+                if (loan.status !== 'Selesai' && now > loan.dueTime && loan.status !== 'Telat') {
+                    loan.status = 'Telat';
+                    changed = true;
                     const user = db.users.find(u => u.id === loan.userId);
-                    const details = db.loan_details.filter(d => d.loanId === loan.id && d.status !== 'RETURNED');
-                    const itemNames = details.map(d => {
-                        const it = db.items.find(i => i.id === d.itemId);
-                        return `${it ? it.name : 'Alat'} ${d.unitCode ? `(${d.unitCode})` : `(${d.qty}x)`}`;
-                    }).join(', ');
-                    return `
-                        <div class="text-xs bg-white/80 border border-rose-200 rounded-lg px-3 py-1.5 flex flex-wrap items-center justify-between gap-2">
-                            <span><strong class="text-rose-800">${user ? user.name : 'Siswa'}</strong> — Membawa: <strong>${itemNames}</strong></span>
-                            <span class="font-mono text-[11px] text-rose-600 font-bold">Batas: ${formatDateTime(loan.dueTime)}</span>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                alertContainer.classList.add('hidden');
+                    showToast(`⚠️ PERINGATAN TELAT: Peminjaman milik ${user ? user.name : 'Siswa'} telah melewati batas waktu!`, 'error');
+                }
+            });
+
+            if (changed) {
+                saveDb();
+                renderAll();
             }
+        }
 
-            // Stock Grid Cards
-            const stockGrid = document.getElementById('dashboardStockGrid');
-            stockGrid.innerHTML = db.items.map(item => {
-                const percentAvail = item.totalStock > 0 ? Math.round((item.availableStock / item.totalStock) * 100) : 0;
-                const barColor = item.availableStock === 0 ? 'bg-rose-500' : (item.availableStock <= 1 ? 'bg-amber-500' : 'bg-emerald-500');
-
-                let unitBadges = '';
-                if (item.isSerialized && item.units.length > 0) {
-                    unitBadges = `
-                        <div class="mt-3 pt-2.5 border-t border-slate-100">
-                            <div class="text-[10px] font-bold uppercase text-slate-400 mb-1.5">Tracking Kode Unit Unik:</div>
-                            <div class="flex flex-wrap gap-1.5">
-                                ${item.units.map(u => {
-                                    if (u.status === 'AVAILABLE') {
-                                        return `<span class="px-2 py-0.5 text-[11px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md" title="Tersedia di Rak">${u.code} ✓</span>`;
-                                    } else if (u.status === 'DAMAGED') {
-                                        return `<span class="px-2 py-0.5 text-[11px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 rounded-md" title="Rusak">${u.code} ✕</span>`;
-                                    } else {
-                                        return `<span class="px-2 py-0.5 text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-md" title="Dipinjam oleh: ${u.holder}">${u.code} (${u.holder ? u.holder.split(' ')[0] : 'Dipinjam'})</span>`;
-                                    }
-                                }).join('')}
-                            </div>
+        // ===================================================================
+        // RENDER 1: PANTAUAN STOK ALAT REAL-TIME
+        // ===================================================================
+        function renderStockCards() {
+            const container = document.getElementById('stockCardsContainer');
+            container.innerHTML = db.items.map(item => {
+                // Jika item punya kode unit unik (Laptop)
+                let unitHtml = '';
+                if (item.isSerialized) {
+                    unitHtml = `
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap gap-1.5">
+                            ${item.units.map(u => {
+                                const isAvail = u.status === 'Tersedia';
+                                const isDamaged = u.status === 'Rusak';
+                                const badgeClass = isAvail
+                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                    : (isDamaged ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-amber-100 text-amber-800 border-amber-300');
+                                return `<span class="px-2 py-0.5 text-[11px] font-mono font-bold border rounded-md ${badgeClass}">
+                                    ${u.code}: ${u.status}
+                                </span>`;
+                            }).join('')}
                         </div>
                     `;
                 }
 
                 return `
-                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white transition shadow-xs">
-                        <div class="flex items-start justify-between gap-2">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
                             <div>
-                                <h4 class="text-sm font-bold text-slate-900">${item.name}</h4>
-                                <span class="text-[11px] text-slate-500 font-mono">${item.id} • Total Aset: ${item.totalStock}</span>
+                                <span class="text-[11px] font-mono text-slate-400">${item.id}</span>
+                                <h3 class="text-base font-extrabold text-slate-900">${item.name}</h3>
                             </div>
-                            <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${item.availableStock > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                                ${item.availableStock} di Rak
+                            <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold ${item.available > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+                                ${item.available}/${item.total} Tersedia
                             </span>
                         </div>
-
-                        <div class="mt-3">
-                            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${percentAvail}%"></div>
-                            </div>
-                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
-                                <span>Tersedia: <strong>${item.availableStock}</strong></span>
-                                <span>Dipinjam: <strong>${Math.max(0, item.totalStock - item.availableStock - item.damagedStock)}</strong></span>
-                                <span class="${item.damagedStock > 0 ? 'text-rose-600 font-bold' : ''}">Rusak: <strong>${item.damagedStock}</strong></span>
-                            </div>
+                        <div class="mt-2 text-xs text-slate-500 flex gap-3">
+                            <span>Dipinjam: <strong>${item.total - item.available - item.damaged}</strong></span>
+                            <span>Rusak: <strong class="${item.damaged > 0 ? 'text-rose-600' : ''}">${item.damaged}</strong></span>
                         </div>
-                        ${unitBadges}
+                        ${unitHtml}
                     </div>
                 `;
             }).join('');
-
-            // WhatsApp Logs
-            const waContainer = document.getElementById('waLogContainer');
-            if (db.waLogs.length === 0) {
-                waContainer.innerHTML = `<p class="text-slate-400 italic">Belum ada notifikasi WA terkirim.</p>`;
-            } else {
-                waContainer.innerHTML = db.waLogs.map(log => `
-                    <div class="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl">
-                        <div class="flex justify-between text-[10px] font-bold text-emerald-800">
-                            <span>Ke: ${log.to}</span>
-                            <span class="font-mono">${log.time}</span>
-                        </div>
-                        <p class="text-[11px] text-slate-700 mt-1 leading-snug">${log.msg}</p>
-                    </div>
-                `).join('');
-            }
         }
 
-        function sendAllWhatsAppReminders() {
-            const overdueLoans = db.loans.filter(l => l.status === 'OVERDUE');
-            if (overdueLoans.length === 0) {
-                showToast('Tidak ada peminjaman yang terlambat saat ini.', 'info');
-                return;
-            }
-            overdueLoans.forEach(loan => {
-                const user = db.users.find(u => u.id === loan.userId);
-                if (user) {
-                    addWaLog(user, `[BOT WA BENGKEL TI] Halo ${user.name}, alat pada transaksi ${loan.id} sudah TELAT kembali. Harap segera dikembalikan ke ruang PLP!`);
-                }
-            });
-            showToast(`Berhasil mengirim ${overdueLoans.length} pesan pengingat WhatsApp otomatis!`, 'success');
-            renderDashboard();
-        }
-
-        // 2. RENDER BORROW FORM & QR SCANNER
-        function renderBorrowForm() {
-            // Quick QR Buttons
-            const qrDiv = document.getElementById('quickQrButtons');
-            qrDiv.innerHTML = db.items.map(item => `
-                <button type="button" onclick="simulateQrScan('${item.id}')" class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:border-brand-400 hover:bg-brand-50/50 text-left transition">
-                    <div>
-                        <div class="text-xs font-bold text-slate-800">${item.name}</div>
-                        <div class="text-[10px] font-mono text-slate-500">QR: ${item.id} • Stok: ${item.availableStock}</div>
-                    </div>
-                    <span class="px-2 py-1 bg-brand-100 text-brand-700 text-[10px] font-bold rounded-lg">Scan QR</span>
-                </button>
-            `).join('');
-
-            // Borrower Select
-            const borrowerSelect = document.getElementById('borrowerSelect');
-            const prevVal = borrowerSelect.value;
-            borrowerSelect.innerHTML = db.users.map(u => {
-                const hasUnreturned = checkUserHasUnreturnedLoans(u.id);
-                return `<option value="${u.id}">${u.name} — ${u.idNumber} (${u.role}) ${hasUnreturned ? '⚠️ [ADA TANGGUNGAN]' : ''}</option>`;
+        // ===================================================================
+        // RENDER 2: FORM PINJAM CEPAT + LOGIKA BLOKIR OTOMATIS (SKENARIO 3)
+        // ===================================================================
+        function renderFormOptions() {
+            const userSelect = document.getElementById('userSelect');
+            const prevUser = userSelect.value;
+            userSelect.innerHTML = db.users.map(u => {
+                const hasUnpaid = db.loans.some(l => l.userId === u.id && l.status !== 'Selesai');
+                return `<option value="${u.id}">${u.name} ${hasUnpaid ? '⚠️ [Masih Ada Pinjaman]' : ''}</option>`;
             }).join('');
-            if (prevVal && db.users.some(u => u.id === prevVal)) {
-                borrowerSelect.value = prevVal;
-            }
+            if (prevUser && db.users.some(u => u.id === prevUser)) userSelect.value = prevUser;
 
-            // Item Select
             const itemSelect = document.getElementById('itemSelect');
-            const prevItemVal = itemSelect.value;
+            const prevItem = itemSelect.value;
             itemSelect.innerHTML = db.items.map(it => `
-                <option value="${it.id}" ${it.availableStock === 0 ? 'disabled' : ''}>
-                    ${it.name} (Tersedia: ${it.availableStock})
-                </option>
+                <option value="${it.id}">${it.name} (Stok Rak: ${it.available})</option>
             `).join('');
-            if (prevItemVal && db.items.some(i => i.id === prevItemVal)) {
-                itemSelect.value = prevItemVal;
-            }
+            if (prevItem && db.items.some(i => i.id === prevItem)) itemSelect.value = prevItem;
 
-            onItemSelectChange();
-            checkBorrowerEligibility();
-            renderBorrowCart();
+            handleItemChange();
+            validateBorrower();
+            renderCart();
         }
 
-        function simulateQrScan(itemId) {
-            const item = db.items.find(i => i.id === itemId);
-            if (!item) return;
-            document.getElementById('qrStatusText').textContent = `Terdeteksi: ${item.name} (${item.id})`;
-            document.getElementById('itemSelect').value = itemId;
-            onItemSelectChange();
-            addItemToCart();
-        }
-
-        function onItemSelectChange() {
+        function handleItemChange() {
             const itemId = document.getElementById('itemSelect').value;
             const item = db.items.find(i => i.id === itemId);
-            const unitWrapper = document.getElementById('unitCodeWrapper');
-            const qtyWrapper = document.getElementById('qtyWrapper');
-            const unitSelect = document.getElementById('unitCodeSelect');
+            const unitWrap = document.getElementById('unitSelectWrapper');
+            const qtyWrap = document.getElementById('qtyInputWrapper');
+            const unitSelect = document.getElementById('unitSelect');
 
             if (!item) return;
 
             if (item.isSerialized) {
-                unitWrapper.classList.remove('hidden');
-                qtyWrapper.classList.add('hidden');
-                const availUnits = item.units.filter(u => u.status === 'AVAILABLE' && !borrowCart.some(c => c.unitCode === u.code));
-                if (availUnits.length === 0) {
-                    unitSelect.innerHTML = `<option value="">Semua unit habis / di keranjang</option>`;
-                } else {
-                    unitSelect.innerHTML = availUnits.map(u => `<option value="${u.code}">${u.code} (Siap Pinjam)</option>`).join('');
-                }
+                unitWrap.classList.remove('hidden');
+                qtyWrap.classList.add('hidden');
+                const availUnits = item.units.filter(u => u.status === 'Tersedia' && !cart.some(c => c.unitCode === u.code));
+                unitSelect.innerHTML = availUnits.length > 0
+                    ? availUnits.map(u => `<option value="${u.code}">${u.code} (Tersedia)</option>`).join('')
+                    : `<option value="">-- Tidak ada unit tersedia --</option>`;
             } else {
-                unitWrapper.classList.add('hidden');
-                qtyWrapper.classList.remove('hidden');
-                document.getElementById('itemQtyInput').max = item.availableStock;
-                document.getElementById('itemQtyInput').value = 1;
+                unitWrap.classList.add('hidden');
+                qtyWrap.classList.remove('hidden');
+                document.getElementById('qtyInput').max = item.available;
+                document.getElementById('qtyInput').value = 1;
             }
         }
 
-        function addItemToCart() {
+        // Logika Skenario 3: Blokir Otomatis jika masih punya pinjaman aktif/telat
+        function validateBorrower() {
+            const userId = document.getElementById('userSelect').value;
+            const user = db.users.find(u => u.id === userId);
+            const activeLoan = db.loans.find(l => l.userId === userId && l.status !== 'Selesai');
+
+            const alertBox = document.getElementById('blockerAlert');
+            const msgEl = document.getElementById('blockerMessage');
+            const submitBtn = document.getElementById('borrowSubmitBtn');
+
+            if (activeLoan) {
+                alertBox.classList.remove('hidden');
+                msgEl.innerHTML = `<strong>${user.name}</strong> masih memiliki tanggungan transaksi <strong>${activeLoan.id}</strong> (Status: <strong>${activeLoan.status}</strong>). Kembalikan alat sebelumnya terlebih dahulu sebelum meminjam lagi!`;
+                submitBtn.disabled = true;
+            } else {
+                alertBox.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+
+        function addToCart() {
             const itemId = document.getElementById('itemSelect').value;
             const item = db.items.find(i => i.id === itemId);
-            if (!item || item.availableStock <= 0) {
-                showToast('Maaf, stok alat ini sedang kosong di rak!', 'error');
+            if (!item || item.available <= 0) {
+                showToast('Maaf, stok alat ini sedang habis di rak!', 'error');
                 return;
             }
 
             if (item.isSerialized) {
-                const unitCode = document.getElementById('unitCodeSelect').value;
+                const unitCode = document.getElementById('unitSelect').value;
                 if (!unitCode) {
-                    showToast('Tidak ada kode unit tersisa untuk dipilih.', 'error');
+                    showToast('Tidak ada unit Laptop tersedia untuk dipilih.', 'error');
                     return;
                 }
-                borrowCart.push({
-                    itemId: item.id,
-                    itemName: item.name,
-                    unitCode: unitCode,
-                    qty: 1
-                });
+                cart.push({ itemId: item.id, name: item.name, unitCode, qty: 1 });
             } else {
-                const qty = parseInt(document.getElementById('itemQtyInput').value, 10) || 1;
-                const existingInCart = borrowCart.find(c => c.itemId === item.id);
-                const currentCartQty = existingInCart ? existingInCart.qty : 0;
+                const qty = parseInt(document.getElementById('qtyInput').value, 10) || 1;
+                const inCart = cart.find(c => c.itemId === item.id);
+                const currentQty = inCart ? inCart.qty : 0;
 
-                if (qty + currentCartQty > item.availableStock) {
-                    showToast(`Stok tidak cukup! Maksimal tersedia di rak: ${item.availableStock} unit.`, 'error');
+                if (qty + currentQty > item.available) {
+                    showToast(`Stok tidak mencukupi! Maksimal tersedia: ${item.available}.`, 'error');
                     return;
                 }
-
-                if (existingInCart) {
-                    existingInCart.qty += qty;
+                if (inCart) {
+                    inCart.qty += qty;
                 } else {
-                    borrowCart.push({
-                        itemId: item.id,
-                        itemName: item.name,
-                        unitCode: null,
-                        qty: qty
-                    });
+                    cart.push({ itemId: item.id, name: item.name, unitCode: null, qty });
                 }
             }
 
-            onItemSelectChange();
-            renderBorrowCart();
-            showToast(`${item.name} ditambahkan ke daftar pinjam.`, 'success');
+            handleItemChange();
+            renderCart();
         }
 
-        function removeFromCart(index) {
-            borrowCart.splice(index, 1);
-            onItemSelectChange();
-            renderBorrowCart();
+        function removeCartItem(index) {
+            cart.splice(index, 1);
+            handleItemChange();
+            renderCart();
         }
 
-        function renderBorrowCart() {
-            const list = document.getElementById('borrowCartList');
-            document.getElementById('cartCountLabel').textContent = `${borrowCart.length} Item Dipilih`;
+        function renderCart() {
+            const list = document.getElementById('cartList');
+            document.getElementById('cartCount').textContent = `${cart.length} Item`;
 
-            if (borrowCart.length === 0) {
-                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada alat dipilih. Silakan tambah alat atau scan QR.</p>`;
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="p-2 text-slate-400">Belum ada alat ditambahkan.</div>`;
                 return;
             }
 
-            list.innerHTML = borrowCart.map((c, idx) => `
-                <div class="px-3.5 py-2.5 flex items-center justify-between bg-white text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-[11px]">${idx + 1}</span>
-                        <div>
-                            <div class="font-bold text-slate-800">${c.itemName}</div>
-                            <div class="text-[11px] text-slate-500">
-                                ${c.unitCode ? `Kode Unik: <span class="font-mono font-bold text-brand-700">${c.unitCode}</span>` : `Jumlah: <strong>${c.qty} unit</strong>`}
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="removeFromCart(${idx})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg" title="Hapus">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
+            list.innerHTML = cart.map((c, i) => `
+                <div class="p-2 flex items-center justify-between text-slate-800">
+                    <span>
+                        <strong>${c.name}</strong>
+                        ${c.unitCode ? `<span class="font-mono text-blue-700 font-bold">(${c.unitCode})</span>` : `(${c.qty} unit)`}
+                    </span>
+                    <button type="button" onclick="removeCartItem(${i})" class="text-rose-600 font-bold hover:underline">Hapus</button>
                 </div>
             `).join('');
-            lucide.createIcons();
         }
 
-        // SKENARIO 3: CHECK BORROWER ELIGIBILITY (AUTO-BLOCKER)
-        function checkUserHasUnreturnedLoans(userId) {
-            const userLoans = db.loans.filter(l => l.userId === userId && l.status !== 'DONE');
-            return userLoans.length > 0 ? userLoans : null;
-        }
-
-        function checkBorrowerEligibility() {
-            const userId = document.getElementById('borrowerSelect').value;
-            const user = db.users.find(u => u.id === userId);
-            const blockerAlert = document.getElementById('borrowerBlockerAlert');
-            const infoCard = document.getElementById('borrowerInfoCard');
-            const submitBtn = document.getElementById('submitLoanBtn');
-
-            if (!user) return;
-
-            const unreturnedLoans = checkUserHasUnreturnedLoans(userId);
-            if (unreturnedLoans) {
-                blockerAlert.classList.remove('hidden');
-                infoCard.classList.add('hidden');
-                submitBtn.disabled = true;
-
-                const loanCodes = unreturnedLoans.map(l => `${l.id} (${l.status === 'OVERDUE' ? 'TELAT' : 'BELUM KEMBALI'})`).join(', ');
-                document.getElementById('borrowerBlockerReason').innerHTML = `
-                    Akun <strong>${user.name}</strong> masih memiliki pinjaman aktif yang belum diselesaikan: <strong>${loanCodes}</strong>. Sesuai aturan Bengkel TI, siswa tidak dapat meminjam alat baru sebelum tanggungan sebelumnya dikembalikan!
-                `;
-            } else {
-                blockerAlert.classList.add('hidden');
-                infoCard.classList.remove('hidden');
-                submitBtn.disabled = false;
-                infoCard.innerHTML = `
-                    <div>
-                        <span class="text-slate-500">Identitas:</span> <strong class="text-slate-900">${user.idNumber}</strong> •
-                        <span class="text-slate-500">WA:</span> <strong class="text-slate-900">${user.wa}</strong>
-                    </div>
-                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-full">✓ Bebas Tanggungan (Boleh Pinjam)</span>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        function triggerOverdueBlockerDemo() {
-            // Select Rizky Ramadhan (USR-06) who has an overdue loan
-            const borrowerSelect = document.getElementById('borrowerSelect');
-            if (borrowerSelect) {
-                borrowerSelect.value = 'USR-06';
-                checkBorrowerEligibility();
-                showToast('Skenario 3 Aktif: Sistem otomatis memblokir Rizky karena masih nunggak!', 'error');
-            }
-        }
-
-        function submitLoanTransaction() {
-            const userId = document.getElementById('borrowerSelect').value;
+        function submitBorrow() {
+            const userId = document.getElementById('userSelect').value;
             const user = db.users.find(u => u.id === userId);
 
-            if (checkUserHasUnreturnedLoans(userId)) {
-                showToast('Peminjaman ditolak! Peminjam masih memiliki tanggungan alat.', 'error');
+            if (db.loans.some(l => l.userId === userId && l.status !== 'Selesai')) {
+                showToast('Gagal: Peminjam masih memiliki tanggungan belum dikembalikan!', 'error');
                 return;
             }
-            if (borrowCart.length === 0) {
-                showToast('Pilih minimal 1 alat sebelum menyimpan peminjaman!', 'error');
+            if (cart.length === 0) {
+                showToast('Tambahkan minimal 1 alat ke daftar pinjam terlebih dahulu.', 'error');
                 return;
             }
 
-            // Acquire Database Lock (Scenario 1 protection)
-            if (dbMutexLock) {
-                showToast('Database sedang dikunci transaksi lain. Silakan coba sesaat lagi.', 'error');
+            // Kunci Database Sementara (Skenario 1)
+            if (isDbLocked) {
+                showToast('Database sedang sibuk, silakan coba sesaat lagi.', 'error');
                 return;
             }
-            dbMutexLock = true;
+            isDbLocked = true;
 
             try {
-                // Re-verify stock right before committing
-                for (const cartItem of borrowCart) {
-                    const dbItem = db.items.find(i => i.id === cartItem.itemId);
-                    if (!dbItem || dbItem.availableStock < cartItem.qty) {
-                        throw new Error(`Maaf, stok ${cartItem.itemName} baru saja habis diambil orang lain!`);
-                    }
-                    if (cartItem.unitCode) {
-                        const unitObj = dbItem.units.find(u => u.code === cartItem.unitCode);
-                        if (!unitObj || unitObj.status !== 'AVAILABLE') {
-                            throw new Error(`Maaf, unit ${cartItem.unitCode} baru saja dipinjam orang lain!`);
-                        }
+                // Validasi ulang ketersediaan stok tepat sebelum disimpan
+                for (const c of cart) {
+                    const it = db.items.find(i => i.id === c.itemId);
+                    if (!it || it.available < c.qty) {
+                        throw new Error(`Maaf, stok ${c.name} baru saja habis!`);
                     }
                 }
 
-                const durationMinutes = parseFloat(document.getElementById('durationSelect').value);
+                const minutes = parseFloat(document.getElementById('durationSelect').value);
                 const now = Date.now();
-                const dueTime = now + (durationMinutes * 60 * 1000);
-                const notes = document.getElementById('loanNotesInput').value.trim() || 'Praktikum Bengkel TI';
-                const newLoanId = 'TRX-' + Math.floor(1000 + Math.random() * 9000);
+                const loanId = 'TRX-' + String(db.loans.length + 1).padStart(2, '0');
 
-                // Insert into loans table
                 db.loans.unshift({
-                    id: newLoanId,
+                    id: loanId,
                     userId: user.id,
                     borrowTime: now,
-                    dueTime: dueTime,
-                    notes: notes,
-                    status: 'ACTIVE'
+                    dueTime: now + minutes * 60 * 1000,
+                    status: 'Dipinjam'
                 });
 
-                // Insert into loan_details & update stock
-                borrowCart.forEach((cartItem, idx) => {
-                    const dbItem = db.items.find(i => i.id === cartItem.itemId);
-                    dbItem.availableStock -= cartItem.qty;
+                cart.forEach((c, idx) => {
+                    const it = db.items.find(i => i.id === c.itemId);
+                    it.available -= c.qty;
 
-                    if (cartItem.unitCode) {
-                        const unitObj = dbItem.units.find(u => u.code === cartItem.unitCode);
-                        if (unitObj) {
-                            unitObj.status = 'BORROWED';
-                            unitObj.holder = user.name;
+                    if (c.unitCode) {
+                        const unit = it.units.find(u => u.code === c.unitCode);
+                        if (unit) {
+                            unit.status = 'Dipinjam';
+                            unit.holder = user.name;
                         }
                     }
 
                     db.loan_details.push({
-                        id: 'DTL-' + Date.now() + '-' + idx,
-                        loanId: newLoanId,
-                        itemId: cartItem.itemId,
-                        unitCode: cartItem.unitCode,
-                        qty: cartItem.qty,
-                        returnedQty: 0,
-                        condition: 'GOOD',
-                        status: 'BORROWED'
+                        id: 'D' + Date.now() + idx,
+                        loanId: loanId,
+                        itemId: c.itemId,
+                        unitCode: c.unitCode,
+                        qty: c.qty,
+                        status: 'Dipinjam',
+                        condition: '-'
                     });
                 });
 
-                saveDatabase();
-                borrowCart = [];
-                document.getElementById('loanNotesInput').value = '';
-                showToast(`Transaksi ${newLoanId} berhasil disimpan! Stok rak otomatis berkurang.`, 'success');
-                switchTab('loans');
-            } catch (err) {
-                showToast(err.message, 'error');
+                cart = [];
+                saveDb();
+                showToast(`Berhasil! Transaksi ${loanId} atas nama ${user.name} tercatat.`, 'success');
+                renderAll();
+            } catch (e) {
+                showToast(e.message, 'error');
             } finally {
-                dbMutexLock = false;
+                isDbLocked = false;
             }
         }
 
-        // 3. RENDER LOANS & PARTIAL RETURN (SKENARIO 2: CICIL BALIK)
-        function setLoanFilter(filter) {
-            loanFilter = filter;
-            ['ALL', 'ACTIVE', 'DONE'].forEach(f => {
-                const btn = document.getElementById(`filter-${f}`);
-                if (f === filter) {
-                    btn.className = 'loan-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white';
+        // ===================================================================
+        // SIMULASI SKENARIO 1: REBUTAN STOK TERAKHIR (DATABASE LOCK)
+        // ===================================================================
+        function simulateRaceCondition() {
+            const box = document.getElementById('raceResultBox');
+            box.classList.remove('hidden');
+
+            const laptop = db.items.find(i => i.id === 'I1');
+            const lastUnit = laptop ? laptop.units.find(u => u.code === 'LAPTOP-03') : null;
+
+            box.innerHTML = `<div class="text-amber-300">⏳ Budi & Andi menekan tombol "Pinjam" secara bersamaan pada detik 00:00.01...</div>`;
+
+            setTimeout(() => {
+                if (lastUnit && lastUnit.status === 'Tersedia') {
+                    // Budi masuk 0.01 detik lebih dulu -> mengunci database (Database Lock)
+                    isDbLocked = true;
+                    laptop.available -= 1;
+                    lastUnit.status = 'Dipinjam';
+                    lastUnit.holder = 'Budi Santoso (XI TKJ 1)';
+
+                    const newId = 'TRX-' + String(db.loans.length + 1).padStart(2, '0');
+                    db.loans.unshift({
+                        id: newId,
+                        userId: 'U1',
+                        borrowTime: Date.now(),
+                        dueTime: Date.now() + 7200000,
+                        status: 'Dipinjam'
+                    });
+                    db.loan_details.push({
+                        id: 'D' + Date.now(),
+                        loanId: newId,
+                        itemId: 'I1',
+                        unitCode: 'LAPTOP-03',
+                        qty: 1,
+                        status: 'Dipinjam',
+                        condition: '-'
+                    });
+                    isDbLocked = false;
+                    saveDb();
+                    renderAll();
+
+                    box.innerHTML = `
+                        <div class="text-emerald-400">✅ <strong>Budi Santoso (00:00.01):</strong> Berhasil mengunci data & mendapatkan <strong>LAPTOP-03</strong>!</div>
+                        <div class="text-rose-400">❌ <strong>Andi Pratama (00:00.02):</strong> Ditolak otomatis — <em>"Maaf, stok baru saja habis"</em>.</div>
+                    `;
                 } else {
-                    btn.className = 'loan-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200';
+                    box.innerHTML = `
+                        <div class="text-rose-400">❌ <strong>Budi & Andi:</strong> <em>"Maaf, stok baru saja habis"</em> (LAPTOP-03 sudah berstatus Dipinjam). Klik Reset Data Demo untuk mengulang simulasi.</div>
+                    `;
                 }
-            });
-            renderLoansList();
+            }, 500);
         }
 
-        function renderLoansList() {
-            const container = document.getElementById('loansListContainer');
-            let filteredLoans = db.loans;
+        // ===================================================================
+        // RENDER 3: PEMINJAMAN AKTIF & PENGEMBALIAN DICICIL (SKENARIO 2)
+        // ===================================================================
+        function renderActiveLoans() {
+            const container = document.getElementById('activeLoansContainer');
+            const activeLoans = db.loans.filter(l => l.status !== 'Selesai');
+            document.getElementById('activeLoanCountBadge').textContent = `${activeLoans.length} Aktif`;
 
-            if (loanFilter === 'ACTIVE') {
-                filteredLoans = db.loans.filter(l => l.status !== 'DONE');
-            } else if (loanFilter === 'DONE') {
-                filteredLoans = db.loans.filter(l => l.status === 'DONE');
-            }
-
-            if (filteredLoans.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">Tidak ada data transaksi pada filter ini.</div>`;
+            if (activeLoans.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">Semua alat sudah dikembalikan ke rak. Tidak ada peminjaman aktif.</div>`;
                 return;
             }
 
-            container.innerHTML = filteredLoans.map(loan => {
+            container.innerHTML = activeLoans.map(loan => {
                 const user = db.users.find(u => u.id === loan.userId);
                 const details = db.loan_details.filter(d => d.loanId === loan.id);
+                const isOverdue = loan.status === 'Telat';
 
-                const isOverdue = loan.status === 'OVERDUE';
-                const isDone = loan.status === 'DONE';
-
-                const cardBorder = isOverdue
-                    ? 'border-2 border-rose-500 bg-rose-50/40'
-                    : (isDone ? 'border border-slate-200 bg-slate-50/60 opacity-85' : 'border border-amber-300 bg-amber-50/20');
-
-                const statusBadge = isOverdue
-                    ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-600 text-white animate-pulse">⚠️ TELAT KEMBALI</span>`
-                    : (isDone
-                        ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">✓ SELESAI</span>`
-                        : `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">⏳ SEDANG DIPINJAM</span>`);
+                const cardClass = isOverdue
+                    ? 'border-2 border-rose-500 bg-rose-50'
+                    : 'border border-slate-200 bg-slate-50/70';
 
                 return `
-                    <div class="rounded-2xl p-4 sm:p-5 ${cardBorder} transition">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/70">
+                    <div class="rounded-2xl p-4 space-y-3 transition ${cardClass}">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="font-mono text-xs font-bold px-2 py-0.5 bg-slate-800 text-white rounded">${loan.id}</span>
-                                    <h4 class="text-sm font-bold text-slate-900">${user ? user.name : 'Unknown'}</h4>
-                                    ${statusBadge}
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 bg-slate-900 text-white font-mono text-[11px] font-bold rounded">${loan.id}</span>
+                                    <span class="text-sm font-bold text-slate-900">${user ? user.name : 'Siswa'}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold ${isOverdue ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-100 text-amber-800'}">
+                                        ${isOverdue ? '⚠️ TELAT KEMBALI' : '⏳ Dipinjam'}
+                                    </span>
                                 </div>
-                                <p class="text-xs text-slate-500 mt-1">
-                                    Keperluan: <em>"${loan.notes}"</em> • Pinjam: ${formatDateTime(loan.borrowTime)} •
-                                    <strong class="${isOverdue ? 'text-rose-600' : 'text-slate-700'}">Batas: ${formatDateTime(loan.dueTime)}</strong>
+                                <p class="text-[11px] text-slate-600 mt-1">
+                                    Batas Kembali: <strong class="${isOverdue ? 'text-rose-700' : ''}">${formatTime(loan.dueTime)}</strong>
                                 </p>
                             </div>
+
                             ${isOverdue ? `
-                                <button onclick="sendSingleWaReminder('${loan.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 self-start">
-                                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                                    <span>Ingatkan via WA</span>
+                                <button onclick="sendWaReminder('${loan.id}')" class="self-start px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                                    📲 Kirim Notif WA
                                 </button>
                             ` : ''}
                         </div>
 
-                        <!-- Loan Details Items (Individual / Partial Return) -->
-                        <div class="mt-3 space-y-2">
-                            <div class="text-[11px] font-bold uppercase text-slate-500">Rincian Barang (Dapat Dikembalikan Dicicil Per Item):</div>
+                        <!-- Daftar Rincian Barang (Skenario 2: Pengembalian Dicicil Per Barang) -->
+                        <div class="space-y-2">
                             ${details.map(d => {
                                 const item = db.items.find(i => i.id === d.itemId);
-                                const remainingQty = d.qty - d.returnedQty;
-                                const isItemReturned = d.status === 'RETURNED' || remainingQty <= 0;
+                                const isReturned = d.status === 'Dikembalikan';
 
                                 return `
-                                    <div class="p-3 bg-white rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="p-2 rounded-lg ${isItemReturned ? 'bg-emerald-50 text-emerald-600' : 'bg-brand-50 text-brand-600'}">
-                                                <i data-lucide="${isItemReturned ? 'check-square' : 'package'}" class="w-4 h-4"></i>
-                                            </div>
-                                            <div>
-                                                <div class="text-xs font-bold text-slate-900">
-                                                    ${item ? item.name : 'Alat'}
-                                                    ${d.unitCode ? `<span class="ml-1 font-mono px-1.5 py-0.5 bg-brand-100 text-brand-800 rounded text-[11px]">${d.unitCode}</span>` : ''}
-                                                </div>
-                                                <div class="text-[11px] text-slate-500 mt-0.5">
-                                                    Pinjam: <strong>${d.qty}</strong> • Sudah Kembali: <strong>${d.returnedQty}</strong> • Sisa Belum Balik: <strong class="${remainingQty > 0 ? 'text-amber-600' : 'text-emerald-600'}">${remainingQty}</strong>
-                                                    ${d.condition === 'DAMAGED' ? '<span class="ml-2 px-1.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded">KONDISI RUSAK</span>' : ''}
-                                                </div>
-                                            </div>
+                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                                        <div>
+                                            <span class="font-bold text-slate-800">${item ? item.name : 'Alat'}</span>
+                                            ${d.unitCode ? `<span class="font-mono text-blue-700 font-bold">(${d.unitCode})</span>` : `<span class="text-slate-500">(${d.qty} unit)</span>`}
                                         </div>
 
-                                        ${!isItemReturned ? `
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <select id="cond-${d.id}" class="p-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold">
-                                                    <option value="GOOD">Kondisi: Baik ✓</option>
-                                                    <option value="DAMAGED">Kondisi: Rusak ⚠️</option>
-                                                </select>
-                                                <button onclick="processPartialReturn('${d.id}')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg shadow-xs transition">
-                                                    Kembalikan ${remainingQty > 1 ? '1 Unit (Cicil)' : 'Alat Ini'}
+                                        ${!isReturned ? `
+                                            <div class="flex items-center gap-1.5">
+                                                <button onclick="returnSingleItem('${d.id}', 'Baik')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition">
+                                                    Kembalikan (Baik)
+                                                </button>
+                                                <button onclick="returnSingleItem('${d.id}', 'Rusak')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg transition">
+                                                    Kembalikan (Rusak)
                                                 </button>
                                             </div>
                                         ` : `
-                                            <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Sudah Dikembalikan
+                                            <span class="text-[11px] font-bold ${d.condition === 'Rusak' ? 'text-rose-600' : 'text-emerald-600'}">
+                                                ✓ Sudah Kembali (${d.condition})
                                             </span>
                                         `}
                                     </div>
@@ -1683,311 +710,125 @@
                     </div>
                 `;
             }).join('');
-            lucide.createIcons();
         }
 
-        function processPartialReturn(detailId) {
+        // Proses Pengembalian Per Barang (Dicicil - Skenario 2)
+        function returnSingleItem(detailId, condition) {
             const detail = db.loan_details.find(d => d.id === detailId);
-            if (!detail) return;
+            if (!detail || detail.status === 'Dikembalikan') return;
 
-            const condSelect = document.getElementById(`cond-${detailId}`);
-            const condition = condSelect ? condSelect.value : 'GOOD';
             const item = db.items.find(i => i.id === detail.itemId);
             const loan = db.loans.find(l => l.id === detail.loanId);
 
-            // Return 1 unit at a time to support partial returns
-            detail.returnedQty += 1;
-            if (condition === 'DAMAGED') {
-                detail.condition = 'DAMAGED';
-            }
+            detail.status = 'Dikembalikan';
+            detail.condition = condition;
 
-            if (detail.returnedQty >= detail.qty) {
-                detail.status = 'RETURNED';
-            }
-
-            // Update item stock in inventory
+            // Kembalikan stok ke rak (jika Baik) atau catat rusak (jika Rusak)
             if (item) {
-                if (condition === 'GOOD') {
-                    item.availableStock += 1;
+                if (condition === 'Baik') {
+                    item.available += detail.qty;
                 } else {
-                    item.damagedStock += 1;
+                    item.damaged += detail.qty;
                 }
 
                 if (detail.unitCode) {
-                    const unitObj = item.units.find(u => u.code === detail.unitCode);
-                    if (unitObj) {
-                        unitObj.status = condition === 'GOOD' ? 'AVAILABLE' : 'DAMAGED';
-                        unitObj.holder = null;
+                    const unit = item.units.find(u => u.code === detail.unitCode);
+                    if (unit) {
+                        unit.status = condition === 'Baik' ? 'Tersedia' : 'Rusak';
+                        unit.holder = null;
                     }
                 }
             }
 
-            // Check if ALL details in this loan are now returned
+            // Cek apakah semua barang dalam transaksi ini sudah kembali
             const allDetails = db.loan_details.filter(d => d.loanId === loan.id);
-            if (allDetails.every(d => d.status === 'RETURNED')) {
-                loan.status = 'DONE';
-                showToast(`Seluruh alat pada transaksi ${loan.id} telah kembali. Transaksi SELESAI!`, 'success');
+            if (allDetails.every(d => d.status === 'Dikembalikan')) {
+                loan.status = 'Selesai';
+                showToast(`Semua barang pada ${loan.id} telah kembali. Transaksi SELESAI & blokir peminjam dibuka!`, 'success');
             } else {
-                showToast(`Pengembalian dicicil berhasil dicatat (${condition === 'GOOD' ? 'Kondisi Baik - Stok Rak Bertambah' : 'Kondisi Rusak - Masuk Data Rusak'}).`, 'info');
+                showToast(`Barang dikembalikan (${condition}). Sisa barang lain dalam ${loan.id} masih dipinjam.`, 'info');
             }
 
-            saveDatabase();
-            refreshAllUI();
+            saveDb();
+            renderAll();
         }
 
-        function sendSingleWaReminder(loanId) {
+        // Simulasi Notif WhatsApp Otomatis
+        function sendWaReminder(loanId) {
             const loan = db.loans.find(l => l.id === loanId);
-            if (!loan) return;
             const user = db.users.find(u => u.id === loan.userId);
-            if (user) {
-                addWaLog(user, `[NOTIF WA] Halo ${user.name}, mohon segera kembalikan alat bengkel untuk transaksi ${loan.id} yang sudah melewati batas waktu.`);
-                showToast(`Notifikasi WA terkirim ke ${user.name} (${user.wa})`, 'success');
-                renderDashboard();
-            }
+            const box = document.getElementById('waPreviewBox');
+            const textEl = document.getElementById('waPreviewText');
+
+            box.classList.remove('hidden');
+            textEl.textContent = `Kepada: ${user.name} (${user.wa})\nPesan: "Halo ${user.name}, peminjaman alat Bengkel TI (${loan.id}) telah melewati batas waktu pengembalian. Mohon segera dikembalikan ke PLP SMK N 1 Binjai."`;
+            showToast(`Notifikasi WhatsApp otomatis dikirim ke ${user.name}!`, 'success');
         }
 
-        // 4. SCENARIO 1: RACE CONDITION & DATABASE LOCK SIMULATION
-        function runScenario1Demo() {
-            const logBox = document.getElementById('raceConditionLog');
-            logBox.innerHTML = '';
-
-            function appendLog(text, colorClass = 'text-emerald-400') {
-                const line = document.createElement('div');
-                line.className = colorClass;
-                line.textContent = text;
-                logBox.appendChild(line);
-                logBox.scrollTop = logBox.scrollHeight;
-            }
-
-            const laptopItem = db.items.find(i => i.id === 'ITM-01');
-            const lastUnit = laptopItem ? laptopItem.units.find(u => u.code === 'LAPTOP-03') : null;
-
-            appendLog('[00:00.000] Memulai simulasi konkuren: Budi vs Andi...');
-            appendLog(`[00:00.002] Cek stok LAPTOP-03: ${lastUnit && lastUnit.status === 'AVAILABLE' ? 'TERSEDIA (1 Unit)' : 'SUDAH DIPINJAM'}`);
-
-            setTimeout(() => {
-                appendLog('[00:00.010] Request #1 masuk dari HP Budi Santoso -> Mengaktifkan DATABASE LOCK...', 'text-amber-300');
-            }, 350);
-
-            setTimeout(() => {
-                appendLog('[00:00.015] Request #2 masuk dari HP Andi Pratama -> Menunggu Lock...', 'text-slate-300');
-            }, 700);
-
-            setTimeout(() => {
-                if (lastUnit && lastUnit.status === 'AVAILABLE') {
-                    // Process Budi's loan for LAPTOP-03
-                    laptopItem.availableStock -= 1;
-                    lastUnit.status = 'BORROWED';
-                    lastUnit.holder = 'Budi Santoso (XI TKJ 1)';
-
-                    const newId = 'TRX-LOCK-' + Math.floor(100 + Math.random() * 899);
-                    db.loans.unshift({
-                        id: newId,
-                        userId: 'USR-03',
-                        borrowTime: Date.now(),
-                        dueTime: Date.now() + 7200000,
-                        notes: 'Hasil Simulasi Race Condition (Menang Lock)',
-                        status: 'ACTIVE'
-                    });
-                    db.loan_details.push({
-                        id: 'DTL-LOCK-' + Date.now(),
-                        loanId: newId,
-                        itemId: 'ITM-01',
-                        unitCode: 'LAPTOP-03',
-                        qty: 1,
-                        returnedQty: 0,
-                        condition: 'GOOD',
-                        status: 'BORROWED'
-                    });
-                    saveDatabase();
-                    refreshAllUI();
-
-                    appendLog('[00:00.025] ✅ SUKSES (Budi): LAPTOP-03 berhasil dikunci & dipinjam Budi!', 'text-emerald-400 font-bold');
+        // ===================================================================
+        // RENDER 4: INTIP ISI 4 LACI DATABASE
+        // ===================================================================
+        function switchDbTab(tabName) {
+            activeDbTab = tabName;
+            document.querySelectorAll('.db-tab').forEach(btn => {
+                if (btn.id === `dbtab-${tabName}`) {
+                    btn.className = 'db-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white';
                 } else {
-                    appendLog('[00:00.025] ℹ️ INFO: LAPTOP-03 saat ini sudah berstatus dipinjam.', 'text-amber-300');
+                    btn.className = 'db-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700';
                 }
-            }, 1150);
-
-            setTimeout(() => {
-                appendLog('[00:00.030] 🔓 Database Lock dilepas. Memproses antrean Request #2 (Andi)...', 'text-slate-300');
-                appendLog('[00:00.032] ❌ DITOLAK (Andi): "Maaf, stok baru saja habis!" (Stok = 0)', 'text-rose-400 font-bold');
-                showToast('Simulasi Skenario 1 selesai: Budi menang lock, Andi otomatis ditolak!', 'info');
-            }, 1650);
+            });
+            renderDatabaseTable();
         }
 
-        // 5. RENDER 4 DATABASE TABLES
-        function renderDatabaseTables() {
-            // Users
-            document.getElementById('count-users').textContent = `${db.users.length} rows`;
-            document.getElementById('table-users').innerHTML = db.users.map(u => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-2.5 font-semibold text-slate-800">${u.name}</td>
-                    <td class="p-2.5 font-mono text-slate-600">${u.idNumber}</td>
-                    <td class="p-2.5 font-mono text-slate-600">${u.wa}</td>
-                    <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">${u.role}</span></td>
-                </tr>
-            `).join('');
+        function renderDatabaseTable() {
+            const table = document.getElementById('dbTableOutput');
+            const rows = db[activeDbTab] || [];
 
-            // Items
-            document.getElementById('count-items').textContent = `${db.items.length} rows`;
-            document.getElementById('table-items').innerHTML = db.items.map(it => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-2.5 font-semibold text-slate-800">${it.name}</td>
-                    <td class="p-2.5 font-bold">${it.totalStock}</td>
-                    <td class="p-2.5 text-emerald-600 font-bold">${it.availableStock}</td>
-                    <td class="p-2.5 text-rose-600 font-bold">${it.damagedStock}</td>
-                    <td class="p-2.5 font-mono text-[11px]">${it.isSerialized ? it.units.map(u => u.code).join(', ') : '-'}</td>
-                </tr>
-            `).join('');
-
-            // Loans
-            document.getElementById('count-loans').textContent = `${db.loans.length} rows`;
-            document.getElementById('table-loans').innerHTML = db.loans.map(l => {
-                const u = db.users.find(usr => usr.id === l.userId);
-                return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2.5 font-mono font-bold text-brand-700">${l.id}</td>
-                        <td class="p-2.5">${u ? u.name : l.userId}</td>
-                        <td class="p-2.5 font-mono text-[11px]">${formatDateTime(l.dueTime)}</td>
-                        <td class="p-2.5 font-bold ${l.status === 'OVERDUE' ? 'text-rose-600' : (l.status === 'DONE' ? 'text-emerald-600' : 'text-amber-600')}">${l.status}</td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Loan Details
-            document.getElementById('count-loan-details').textContent = `${db.loan_details.length} rows`;
-            document.getElementById('table-loan-details').innerHTML = db.loan_details.map(d => {
-                const it = db.items.find(i => i.id === d.itemId);
-                return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2.5 font-mono text-slate-600">${d.loanId}</td>
-                        <td class="p-2.5 font-semibold">${it ? it.name : d.itemId} ${d.unitCode ? `(${d.unitCode})` : ''}</td>
-                        <td class="p-2.5">${d.returnedQty}/${d.qty}</td>
-                        <td class="p-2.5">${d.status} (${d.condition})</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function saveNewUser() {
-            const name = document.getElementById('newUserName').value.trim();
-            const idNumber = document.getElementById('newUserIdNum').value.trim();
-            const wa = document.getElementById('newUserWa').value.trim();
-            const role = document.getElementById('newUserRole').value;
-
-            if (!name || !idNumber || !wa) {
-                showToast('Harap lengkapi semua kolom data pengguna!', 'error');
+            if (rows.length === 0) {
+                table.innerHTML = `<tr><td class="p-3 text-slate-400">Tabel kosong.</td></tr>`;
                 return;
             }
 
-            db.users.push({
-                id: 'USR-' + Date.now(),
-                name,
-                idNumber,
-                wa,
-                role
-            });
-            saveDatabase();
-            closeModal('addUserModal');
-            document.getElementById('newUserName').value = '';
-            document.getElementById('newUserIdNum').value = '';
-            document.getElementById('newUserWa').value = '';
-            showToast(`Pengguna baru "${name}" berhasil ditambahkan ke tabel users!`, 'success');
-            refreshAllUI();
+            const headers = Object.keys(rows[0]).filter(k => k !== 'units');
+            table.innerHTML = `
+                <thead class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                    <tr>${headers.map(h => `<th class="p-2.5 font-mono uppercase">${h}</th>`).join('')}</tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    ${rows.map(r => `
+                        <tr class="hover:bg-slate-50">
+                            ${headers.map(h => {
+                                let val = r[h];
+                                if (h === 'borrowTime' || h === 'dueTime') val = formatTime(val);
+                                return `<td class="p-2.5 font-mono text-slate-700">${val === null ? '-' : val}</td>`;
+                            }).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
         }
 
-        function saveNewItem() {
-            const name = document.getElementById('newItemName').value.trim();
-            const total = parseInt(document.getElementById('newItemTotal').value, 10) || 1;
-            const isSerialized = document.getElementById('newItemSerialized').checked;
-
-            if (!name || total < 1) {
-                showToast('Nama alat dan jumlah minimal 1 wajib diisi!', 'error');
-                return;
-            }
-
-            const units = [];
-            if (isSerialized) {
-                const prefix = name.split(' ')[0].toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'UNIT';
-                for (let i = 1; i <= total; i++) {
-                    units.push({
-                        code: `${prefix}-${String(i).padStart(2, '0')}`,
-                        status: 'AVAILABLE',
-                        holder: null
-                    });
-                }
-            }
-
-            db.items.push({
-                id: 'ITM-' + String(db.items.length + 1).padStart(2, '0'),
-                name,
-                totalStock: total,
-                availableStock: total,
-                damagedStock: 0,
-                isSerialized,
-                units
-            });
-
-            saveDatabase();
-            closeModal('addItemModal');
-            document.getElementById('newItemName').value = '';
-            showToast(`Alat baru "${name}" (${total} unit) berhasil ditambahkan ke rak!`, 'success');
-            refreshAllUI();
-        }
-
-        // =========================================================
-        // HELPERS: MODALS, TOASTS, FORMATTING, CLOCK
-        // =========================================================
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            const styles = {
-                success: 'bg-emerald-600 text-white border-emerald-700',
-                error: 'bg-rose-600 text-white border-rose-700',
-                info: 'bg-slate-900 text-white border-slate-700'
-            };
-            toast.className = `pointer-events-auto p-3.5 rounded-xl shadow-lg border text-xs font-semibold flex items-center justify-between gap-2 transition-all transform translate-y-0 ${styles[type] || styles.info}`;
-            toast.innerHTML = `<span>${message}</span>`;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3800);
-        }
-
-        function formatDateTime(ts) {
+        // ===================================================================
+        // HELPER & INISIALISASI HALAMAN
+        // ===================================================================
+        function formatTime(ts) {
             const d = new Date(ts);
-            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) + ' ' +
-                   d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) +
+                   ' (' + d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) + ')';
         }
 
-        function updateLiveClock() {
-            const now = new Date();
-            document.getElementById('liveClock').textContent =
-                now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) +
-                ' • ' +
-                now.toLocaleTimeString('id-ID');
+        function renderAll() {
+            renderStockCards();
+            renderFormOptions();
+            renderActiveLoans();
+            renderDatabaseTable();
         }
 
-        // Initialize App on Window Load
         window.onload = function () {
-            document.getElementById('roleSwitcher').value = db.currentRole || 'PLP';
-            changeRole(db.currentRole || 'PLP');
-            switchTab('dashboard');
-            updateLiveClock();
+            renderAll();
             setInterval(() => {
-                updateLiveClock();
-                checkOverdueLoans();
+                document.getElementById('liveClock').textContent = new Date().toLocaleTimeString('id-ID');
+                checkOverdueRealtime();
             }, 1000);
         };
     </script>
